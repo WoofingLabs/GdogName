@@ -98,7 +98,7 @@
                     <p id="balanceStatus" class="text-light-gray text-sm">GT Balance: 0 | GDOG Balance: 0 | NFTs Owned: 0</p>
                     <div>
                         <label class="block text-left text-light-gray mb-2">Mint NFT Name</label>
-                        <input type="text" id="mintName" placeholder="Enter name (e.g., coolname, 表情😊, 中文)" class="w-full px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
+                        <input type="text" id="mintName" placeholder="Enter name (e.g., coolname, 😊, 中文)" class="w-full px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
                         <p id="nameStatus" class="text-light-gray text-sm mt-1"></p>
                     </div>
                     <div>
@@ -194,7 +194,7 @@
                     await checkBalances();
                     document.getElementById('networkStatus').innerText = 'Connected to Gate Layer (ID: 10088)';
                 } catch (error) {
-                    document.getElementById('networkStatus').innerText = 'Wallet connection failed';
+                    document.getElementById('networkStatus').innerText = 'Wallet connection failed: ' + (error.message || 'Unknown error');
                     console.error('Connection error:', error);
                 }
             } else {
@@ -285,6 +285,347 @@
                 return true;
             } catch (error) {
                 status.innerText = error.code === 4001 ? 'User cancelled approval' : `Approval failed: ${error.message}`;
-               彼此
+                return false;
+            } finally {
+                mintButton.innerHTML = 'Mint NFT';
+            }
+        }
 
-System: * Today's date and time is 08:04 PM CST on Monday, October 06, 2025.
+        async function mintNFT() {
+            const status = document.getElementById('networkStatus');
+            const mintButton = document.getElementById('mintButton');
+            const mintName = document.getElementById('mintName').value.trim();
+
+            if (!web3 || !account) {
+                status.innerText = 'Please connect wallet';
+                return;
+            }
+            if (!mintName || new TextEncoder().encode(mintName).length > 15) {
+                status.innerText = 'Enter a valid name (1-15 bytes)';
+                return;
+            }
+
+            try {
+                mintButton.disabled = true;
+                mintButton.innerHTML = 'Checking... <i class="fa fa-spinner fa-spin ml-2"></i>';
+                status.innerText = 'Checking balance and gas...';
+
+                const gdogBalance = await gdogContract.methods.balanceOf(account).call();
+                if (web3.utils.toBN(gdogBalance).lt(web3.utils.toBN(MINT_FEE))) {
+                    status.innerText = 'Insufficient GDOG balance (need 1000 GDOG)';
+                    return;
+                }
+
+                const allowance = await gdogContract.methods.allowance(account, NFT_ADDRESS).call();
+                if (web3.utils.toBN(allowance).lt(web3.utils.toBN(MINT_FEE))) {
+                    const approved = await approveGDOG();
+                    if (!approved) return;
+                }
+
+                mintButton.innerHTML = 'Minting... <i class="fa fa-spinner fa-spin ml-2"></i>';
+                status.innerText = 'Minting NFT...';
+
+                const gasPrice = await web3.eth.getGasPrice();
+                const estimatedGas = await nftContract.methods.mint(mintName).estimateGas({ from: account });
+                const nativeBalance = await web3.eth.getBalance(account);
+                const gasCost = web3.utils.toBN(gasPrice).mul(web3.utils.toBN(estimatedGas));
+                if (web3.utils.toBN(nativeBalance).lt(gasCost)) {
+                    status.innerText = 'Insufficient GT for gas fees';
+                    return;
+                }
+
+                const tx = await nftContract.methods.mint(mintName).send({
+                    from: account,
+                    gas: web3.utils.toHex(Math.min(estimatedGas * 2, 3000000))
+                });
+                await waitForTransaction(tx.transactionHash);
+
+                status.innerText = `NFT "${mintName}.gdog" minted successfully!`;
+                document.getElementById('mintName').value = '';
+                document.getElementById('nameStatus').innerText = '';
+                await checkBalances();
+            } catch (error) {
+                status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Mint failed: ${error.message}`;
+                console.error('Mint error:', error);
+            } finally {
+                mintButton.disabled = false;
+                mintButton.innerHTML = 'Mint NFT';
+            }
+        }
+
+        async function redeemNFT() {
+            const status = document.getElementById('networkStatus');
+            const redeemButton = document.getElementById('redeemButton');
+            const tokenId = document.getElementById('tokenId').value.trim();
+
+            if (!web3 || !account) {
+                status.innerText = 'Please connect wallet';
+                return;
+            }
+            if (!tokenId || isNaN(tokenId)) {
+                status.innerText = 'Enter valid Token ID';
+                return;
+            }
+
+            try {
+                redeemButton.disabled = true;
+                redeemButton.innerHTML = 'Redeeming... <i class="fa fa-spinner fa-spin ml-2"></i>';
+                status.innerText = 'Checking Token ID and gas...';
+
+                const owner = await nftContract.methods.ownerOf(tokenId).call();
+                if (owner.toLowerCase() !== account.toLowerCase()) {
+                    status.innerText = 'You are not the owner of this NFT';
+                    return;
+                }
+
+                const gasPrice = await web3.eth.getGasPrice();
+                const estimatedGas = await nftContract.methods.release(tokenId).estimateGas({ from: account });
+                const nativeBalance = await web3.eth.getBalance(account);
+                const gasCost = web3.utils.toBN(gasPrice).mul(web3.utils.toBN(estimatedGas));
+                if (web3.utils.toBN(nativeBalance).lt(gasCost)) {
+                    status.innerText = 'Insufficient GT for gas fees';
+                    return;
+                }
+
+                const tx = await nftContract.methods.release(tokenId).send({
+                    from: account,
+                    gas: web3.utils.toHex(Math.min(estimatedGas * 2, 3000000))
+                });
+                await waitForTransaction(tx.transactionHash);
+
+                status.innerText = 'NFT redeemed successfully!';
+                document.getElementById('tokenId').value = '';
+                await checkBalances();
+            } catch (error) {
+                status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Redeem failed: ${error.message}`;
+                console.error('Redeem error:', error);
+            } finally {
+                redeemButton.disabled = false;
+                redeemButton.innerHTML = 'Redeem NFT';
+            }
+        }
+
+        async function batchRedeemNFT() {
+            const status = document.getElementById('networkStatus');
+            const batchRedeemButton = document.getElementById('batchRedeemButton');
+            const checkboxes = document.querySelectorAll('.nft-checkbox:checked');
+
+            if (!web3 || !account) {
+                status.innerText = 'Please connect wallet';
+                return;
+            }
+            if (checkboxes.length === 0) {
+                status.innerText = 'Select at least one NFT';
+                return;
+            }
+
+            try {
+                batchRedeemButton.disabled = true;
+                batchRedeemButton.innerHTML = 'Redeeming... <i class="fa fa-spinner fa-spin ml-2"></i>';
+                status.innerText = 'Batch redeeming NFTs...';
+
+                let nativeBalance = await web3.eth.getBalance(account);
+                const gasPrice = await web3.eth.getGasPrice();
+
+                for (const checkbox of checkboxes) {
+                    const tokenId = checkbox.value;
+                    const owner = await nftContract.methods.ownerOf(tokenId).call();
+                    if (owner.toLowerCase() !== account.toLowerCase()) {
+                        status.innerText = `Token ID ${tokenId} is not your NFT`;
+                        return;
+                    }
+
+                    const estimatedGas = await nftContract.methods.release(tokenId).estimateGas({ from: account });
+                    const gasCost = web3.utils.toBN(gasPrice).mul(web3.utils.toBN(estimatedGas));
+                    if (web3.utils.toBN(nativeBalance).lt(gasCost)) {
+                        status.innerText = 'Insufficient GT for gas fees';
+                        return;
+                    }
+
+                    const tx = await nftContract.methods.release(tokenId).send({
+                        from: account,
+                        gas: web3.utils.toHex(Math.min(estimatedGas * 2, 3000000))
+                    });
+                    await waitForTransaction(tx.transactionHash);
+                    nativeBalance = await web3.eth.getBalance(account);
+                }
+
+                status.innerText = 'Batch redeem successful!';
+                document.getElementById('tokenId').value = '';
+                await checkBalances();
+            } catch (error) {
+                status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Batch redeem failed: ${error.message}`;
+                console.error('Batch redeem error:', error);
+            } finally {
+                batchRedeemButton.disabled = false;
+                batchRedeemButton.innerHTML = 'Batch Redeem Selected NFTs';
+            }
+        }
+
+        function copyContract() {
+            const contract = NFT_ADDRESS;
+            navigator.clipboard.writeText(contract).then(() => {
+                const notification = document.createElement('div');
+                notification.className = 'fixed bottom-4 right-4 bg-primary text-white px-4 py-2 rounded-lg shadow-lg z-50';
+                notification.textContent = 'Contract address copied!';
+                document.body.appendChild(notification);
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transition = 'opacity 0.3s';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 2000);
+            });
+        }
+
+        async function getNFTImage(tokenId) {
+            try {
+                const tokenURI = await nftContract.methods.tokenURI(tokenId).call();
+                const json = JSON.parse(atob(tokenURI.split('data:application/json;base64,')[1]));
+                return json.image; // Returns the data:image/svg+xml;base64,... URL
+            } catch (error) {
+                console.error(`Failed to fetch tokenURI for token ${tokenId}:`, error);
+                return 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="100%" height="100%" fill="#004FD9"/><text x="150" y="150" fill="#FFFFFF" style="dominant-baseline:middle;text-anchor:middle;font-size:20px;">Error</text></svg>');
+            }
+        }
+
+        async function checkNameAvailability(name) {
+            if (!web3 || !account || !name) {
+                document.getElementById('nameStatus').innerText = '';
+                document.getElementById('nameStatus').className = 'text-light-gray text-sm mt-1';
+                return false;
+            }
+            const byteLength = new TextEncoder().encode(name).length;
+            if (byteLength > 15) {
+                document.getElementById('nameStatus').innerText = 'Name too long (max 15 bytes)';
+                document.getElementById('nameStatus').className = 'text-red-500 text-sm mt-1';
+                return false;
+            }
+            try {
+                let tokenId;
+                let attempts = 0;
+                const maxAttempts = 3;
+                while (attempts < maxAttempts) {
+                    try {
+                        tokenId = await nftContract.methods.getTokenIdById(name.toLowerCase()).call();
+                        break;
+                    } catch (error) {
+                        attempts++;
+                        if (attempts === maxAttempts) throw error;
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+                if (tokenId != 0) {
+                    document.getElementById('nameStatus').innerText = 'Name already minted';
+                    document.getElementById('nameStatus').className = 'text-red-500 text-sm mt-1';
+                    return false;
+                } else {
+                    document.getElementById('nameStatus').innerText = 'Name available';
+                    document.getElementById('nameStatus').className = 'text-secondary text-sm mt-1';
+                    return true;
+                }
+            } catch (error) {
+                let errorMessage = 'Error checking name availability';
+                if (error.message.includes('network')) {
+                    errorMessage = 'Network error, please check your connection';
+                } else if (error.message.includes('revert') || error.message.includes('ID not minted')) {
+                    document.getElementById('nameStatus').innerText = 'Name available';
+                    document.getElementById('nameStatus').className = 'text-secondary text-sm mt-1';
+                    return true;
+                }
+                document.getElementById('nameStatus').innerText = errorMessage;
+                document.getElementById('nameStatus').className = 'text-red-500 text-sm mt-1';
+                console.error('Name check error:', error);
+                return false;
+            }
+        }
+
+        async function updateNFTList(nftBalance) {
+            const nftList = document.getElementById('nftList');
+            nftList.innerHTML = '';
+            if (!web3 || !account || nftBalance == 0) {
+                nftList.innerHTML = '<li>No NFTs</li>';
+                document.getElementById('batchRedeemButton').disabled = true;
+                return;
+            }
+            try {
+                for (let i = 0; i < nftBalance; i++) {
+                    const tokenId = await nftContract.methods.tokenOfOwnerByIndex(account, i).call();
+                    const tokenName = await nftContract.methods.tokenName(tokenId).call();
+                    const imageUrl = await getNFTImage(tokenId);
+                    const li = document.createElement('li');
+                    li.className = 'flex items-center py-2';
+                    li.innerHTML = `
+                        <input type="checkbox" class="nft-checkbox mr-2" value="${tokenId}">
+                        <img src="${imageUrl}" alt="NFT ${tokenName}" class="w-10 h-10 rounded mr-2 cursor-pointer" onclick="window.open('${imageUrl}', '_blank')">
+                        <span>${tokenName} (ID: ${tokenId})</span>
+                    `;
+                    nftList.appendChild(li);
+                }
+                document.getElementById('batchRedeemButton').disabled = false;
+            } catch (error) {
+                nftList.innerHTML = `<li>Query NFTs failed: ${error.message}</li>`;
+                document.getElementById('batchRedeemButton').disabled = true;
+                console.error('NFT list error:', error);
+            }
+        }
+
+        async function checkButtonStatus() {
+            if (!web3 || !account) {
+                document.getElementById('mintButton').disabled = true;
+                document.getElementById('redeemButton').disabled = true;
+                document.getElementById('batchRedeemButton').disabled = true;
+                document.getElementById('nameStatus').innerText = '';
+                return;
+            }
+            const mintName = document.getElementById('mintName').value.trim();
+            const tokenId = document.getElementById('tokenId').value.trim();
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(async () => {
+                const isNameAvailable = await checkNameAvailability(mintName);
+                document.getElementById('mintButton').disabled = !mintName || new TextEncoder().encode(mintName).length > 15 || !isNameAvailable;
+            }, 300);
+            document.getElementById('redeemButton').disabled = !tokenId || isNaN(tokenId);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('connectWalletButton').addEventListener('click', initializeWeb3);
+            document.getElementById('mintButton').addEventListener('click', mintNFT);
+            document.getElementById('redeemButton').addEventListener('click', redeemNFT);
+            document.getElementById('batchRedeemButton').addEventListener('click', batchRedeemNFT);
+            document.getElementById('mintName').addEventListener('input', checkButtonStatus);
+            document.getElementById('tokenId').addEventListener('input', checkButtonStatus);
+
+            const menuToggle = document.getElementById('menuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+            menuToggle.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                menuToggle.innerHTML = mobileMenu.classList.contains('hidden')
+                    ? '<i class="fa fa-bars"></i>'
+                    : '<i class="fa fa-times"></i>';
+            });
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    mobileMenu.classList.add('hidden');
+                    menuToggle.innerHTML = '<i class="fa fa-bars"></i>';
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('bg-dark/95', 'shadow-lg');
+                } else {
+                    navbar.classList.remove('bg-dark/95', 'shadow-lg');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
