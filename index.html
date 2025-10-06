@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GdogName NFT</title>
+    <link rel="icon" type="image/png" href="https://woofinglabs.github.io/GdogToTheMoon/images/gdog_logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0068FF',
+                        secondary: '#18E5A0',
+                        accent: '#FFD700',
+                        dark: '#070808',
+                        'light-gray': '#E5E7EB'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Changa One', 'system-ui', 'sans-serif']
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-glow': 'pulse 4s ease-in-out infinite'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-8px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow-glow {
+                text-shadow: 0 0 10px rgba(0, 104, 255, 0.5);
+            }
+            .glow-border {
+                box-shadow: 0 0 12px rgba(24, 229, 160, 0.3);
+            }
+            .bg-grid {
+                background-image: url('data:image/svg+xml,%3Csvg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"%3E%3Ccircle cx="1" cy="1" r="1" fill="%230068FF" fill-opacity="0.1"/%3E%3C/svg%3E');
+                background-size: 20px 20px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Changa+One&display=swap" rel="stylesheet">
+</head>
+<body class="bg-dark text-white font-sans overflow-x-hidden">
+    <header class="fixed w-full z-50 bg-dark/90 backdrop-blur-md transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3 cursor-pointer hover:text-primary transition-colors">
+                <div class="w-10 h-10 rounded-full overflow-hidden">
+                    <img src="https://woofinglabs.github.io/GdogToTheMoon/images/gdog_logo.png" alt="GDOG Logo" class="w-full h-full object-cover">
+                </div>
+                <span class="font-display text-3xl text-primary text-shadow-glow">GdogName NFT</span>
+            </div>
+            <button id="menuToggle" class="md:hidden text-2xl text-primary">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+        <div id="mobileMenu" class="md:hidden bg-dark/95 absolute w-full top-full py-4 px-4 hidden">
+            <div class="flex flex-col space-y-4">
+                <a href="#nft" class="hover:text-primary transition-colors py-2 text-white">GdogName NFTs</a>
+            </div>
+        </div>
+    </header>
+
+    <section id="nft" class="min-h-screen pt-24 pb-16 bg-grid relative overflow-hidden flex items-center justify-center">
+        <div class="absolute inset-0 bg-gradient-to-b from-primary/10 to-dark pointer-events-none"></div>
+        <div class="absolute top-0 left-0 w-80 h-80 bg-primary/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 right-0 w-80 h-80 bg-secondary/10 rounded-full blur-3xl"></div>
+        <div class="container mx-auto px-4 text-center relative z-10">
+            <div class="w-48 h-48 mx-auto mb-8 animate-float">
+                <img src="https://woofinglabs.github.io/GdogToTheMoon/images/gdog_logo.png" alt="GDOG Logo" class="w-full h-full object-cover rounded-full border-4 border-secondary/50 glow-border">
+            </div>
+            <h1 class="font-display text-5xl md:text-7xl mb-6 text-primary text-shadow-glow">GdogName NFT Operations</h1>
+            <p class="text-xl md:text-2xl text-light-gray max-w-3xl mx-auto mb-10">
+                Mint, redeem, and manage your GdogName NFTs.
+            </p>
+            <div class="bg-dark/50 p-6 rounded-lg border border-primary/30 max-w-md mx-auto mb-8">
+                <div class="flex flex-col space-y-4">
+                    <button id="connectWalletButton" class="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all">Connect Wallet</button>
+                    <p id="networkStatus" class="text-light-gray text-sm">Click to connect wallet...</p>
+                    <div class="flex items-center bg-dark/80 p-3 rounded-lg border border-primary/20">
+                        <i class="fa fa-link text-accent mr-3"></i>
+                        <span class="font-mono text-sm text-white truncate">0x45EEed1D43b27CA7d47317d3E4D142b1122B20FF</span>
+                        <button class="ml-3 text-light-gray hover:text-secondary transition-colors" onclick="copyContract()">
+                            <i class="fa fa-copy"></i>
+                        </button>
+                    </div>
+                    <p id="balanceStatus" class="text-light-gray text-sm">GT Balance: 0 | GDOG Balance: 0 | NFTs Owned: 0</p>
+                    <div>
+                        <label class="block text-left text-light-gray mb-2">Mint NFT Name</label>
+                        <input type="text" id="mintName" placeholder="Enter name (e.g., coolname)" class="w-full px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
+                    </div>
+                    <div>
+                        <label class="block text-left text-light-gray mb-2">Redeem NFT Token ID</label>
+                        <input type="text" id="tokenId" placeholder="Enter Token ID" class="w-full px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <button class="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all disabled:bg-dark/50 disabled:cursor-not-allowed" id="mintButton" disabled>Mint NFT</button>
+                        <button class="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all disabled:bg-dark/50 disabled:cursor-not-allowed" id="redeemButton" disabled>Redeem NFT</button>
+                        <button class="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all disabled:bg-dark/50 disabled:cursor-not-allowed" id="batchRedeemButton" disabled>Batch Redeem Selected NFTs</button>
+                    </div>
+                    <div class="bg-dark/80 p-4 rounded-lg border border-primary/20">
+                        <h3 class="text-lg font-medium mb-2">My GdogName NFTs</h3>
+                        <ul id="nftList" class="max-h-48 overflow-y-auto"></ul>
+                    </div>
+                    <div class="mt-4">
+                        <img src="https://woofinglabs.github.io/GdogToTheMoon/images/gdog_logo.png" alt="GDOG" class="w-16 h-16 mx-auto animate-float">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-dark/95 py-12 border-t border-primary/20">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-light-gray text-sm">© 2025 GDOG. All rights reserved. DYOR and invest responsibly.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.7.0/dist/web3.min.js"></script>
+    <script>
+        const GDOG = '0xA037355662d34D9B57dE209E22544a4862F5A30c';
+        const NFT_ADDRESS = '0x45EEed1D43b27CA7d47317d3E4D142b1122B20FF';
+        const MINT_FEE = '1000000000000000000000'; // 1000 GDOG in wei
+        const IMAGE_BASE_URL = 'https://www.gdoggate.com/nft/';
+        const DEFAULT_IMAGE = 'https://woofinglabs.github.io/GdogToTheMoon/images/gdog_logo.png';
+
+        const erc20Abi = [
+            {"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"remaining","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"success","type":"bool"}],"stateMutability":"nonpayable","type":"function"},
+            {"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"stateMutability":"view","type":"function"}
+        ];
+
+        const nftAbi = [
+            {"inputs":[{"internalType":"string","name":"_id","type":"string"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"release","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenOfOwnerByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenName","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"string","name":"_id","type":"string"}],"name":"getTokenIdById","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getIdByTokenId","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"}
+        ];
+
+        const chains = {
+            GateLayer: {
+                chainId: 10088,
+                chainName: 'Gate Layer',
+                rpcUrl: 'https://gatelayer-rpc.gatenode.cc',
+                blockExplorer: 'https://www.gatescan.org/gatelayer/',
+                nativeCurrency: { name: 'GT', symbol: 'GT', decimals: 18 }
+            }
+        };
+
+        let web3, account, gdogContract, nftContract;
+
+        async function waitForTransaction(txHash) {
+            let receipt = null;
+            const maxAttempts = 30;
+            let attempts = 0;
+            while (attempts < maxAttempts) {
+                receipt = await web3.eth.getTransactionReceipt(txHash);
+                if (receipt) {
+                    if (receipt.status) return receipt;
+                    throw new Error(`Transaction ${txHash} failed`);
+                }
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                attempts++;
+            }
+            throw new Error(`Transaction ${txHash} not confirmed after ${maxAttempts} attempts`);
+        }
+
+        async function initializeWeb3() {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                try {
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    account = (await web3.eth.getAccounts())[0];
+                    document.getElementById('connectWalletButton').innerText = `Connected: ${account.slice(0, 6)}...${account.slice(-4)}`;
+                    await switchNetwork('GateLayer');
+                    await initializeContracts();
+                    await checkBalances();
+                    document.getElementById('networkStatus').innerText = 'Connected to Gate Layer (ID: 10088)';
+                } catch (error) {
+                    document.getElementById('networkStatus').innerText = 'Wallet connection failed';
+                    console.error('Connection error:', error);
+                }
+            } else {
+                document.getElementById('networkStatus').innerText = 'Please install MetaMask';
+            }
+        }
+
+        async function switchNetwork(chain) {
+            const chainConfig = chains[chain];
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: `0x${chainConfig.chainId.toString(16)}` }]
+                });
+            } catch (switchError) {
+                if (switchError.code === 4902) {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [{
+                            chainId: `0x${chainConfig.chainId.toString(16)}`,
+                            chainName: chainConfig.chainName,
+                            rpcUrls: [chainConfig.rpcUrl],
+                            nativeCurrency: chainConfig.nativeCurrency,
+                            blockExplorerUrls: [chainConfig.blockExplorer]
+                        }]
+                    });
+                } else {
+                    throw switchError;
+                }
+            }
+        }
+
+        async function initializeContracts() {
+            gdogContract = new web3.eth.Contract(erc20Abi, GDOG);
+            nftContract = new web3.eth.Contract(nftAbi, NFT_ADDRESS);
+        }
+
+        async function checkBalances() {
+            if (!web3 || !account) {
+                document.getElementById('mintButton').disabled = true;
+                document.getElementById('redeemButton').disabled = true;
+                document.getElementById('batchRedeemButton').disabled = true;
+                document.getElementById('balanceStatus').innerText = 'GT Balance: 0 | GDOG Balance: 0 | NFTs Owned: 0';
+                document.getElementById('nftList').innerHTML = '<li>Wallet not connected</li>';
+                return;
+            }
+            try {
+                const gtBalance = await web3.eth.getBalance(account);
+                const gdogBalance = await gdogContract.methods.balanceOf(account).call();
+                const nftBalance = await nftContract.methods.balanceOf(account).call();
+                const gtBalanceFormatted = Number(web3.utils.fromWei(gtBalance, 'ether')).toFixed(4);
+                const gdogBalanceFormatted = Number(web3.utils.fromWei(gdogBalance, 'ether')).toFixed(4);
+                document.getElementById('balanceStatus').innerText = `GT Balance: ${gtBalanceFormatted} | GDOG Balance: ${gdogBalanceFormatted} | NFTs Owned: ${nftBalance}`;
+                await updateNFTList(nftBalance);
+                await checkButtonStatus();
+            } catch (error) {
+                document.getElementById('mintButton').disabled = true;
+                document.getElementById('redeemButton').disabled = true;
+                document.getElementById('batchRedeemButton').disabled = true;
+                document.getElementById('balanceStatus').innerText = 'Query failed';
+                document.getElementById('nftList').innerHTML = `<li>Query failed: ${error.message}</li>`;
+                console.error('Balance check error:', error);
+            }
+        }
+
+        async function approveGDOG() {
+            const status = document.getElementById('networkStatus');
+            const mintButton = document.getElementById('mintButton');
+            try {
+                mintButton.innerHTML = 'Approving... <i class="fa fa-spinner fa-spin ml-2"></i>';
+                status.innerText = 'Approving GDOG...';
+                const gasPrice = await web3.eth.getGasPrice();
+                const estimatedGas = await gdogContract.methods.approve(NFT_ADDRESS, MINT_FEE).estimateGas({ from: account });
+                const nativeBalance = await web3.eth.getBalance(account);
+                const gasCost = web3.utils.toBN(gasPrice).mul(web3.utils.toBN(estimatedGas));
+                if (web3.utils.toBN(nativeBalance).lt(gasCost)) {
+                    status.innerText = 'Insufficient GT for gas fees';
+                    return false;
+                }
+                const tx = await gdogContract.methods.approve(NFT_ADDRESS, MINT_FEE).send({
+                    from: account,
+                    gas: web3.utils.toHex(Math.min(estimatedGas * 2, 1000000))
+                });
+                await waitForTransaction(tx.transactionHash);
+                status.innerText = 'GDOG approval successful!';
+                return true;
+            } catch (error) {
+                status.innerText = error.code === 4001 ? 'User cancelled approval' : `Approval failed: ${error.message}`;
+                return false;
+            } finally {
+                mintButton.innerHTML = 'Mint NFT';
+            }
+        }
+
+        async function mintNFT() {
+            const status = document.getElementById('networkStatus');
+            const mintButton = document.getElementById('mintButton');
+            const mintName = document.getElementById('mintName').value.trim();
+
+            if (!web3 || !account) {
+                status.innerText = 'Please connect wallet';
+                return;
+            }
+            if (!mintName || mintName.length > 15) {
+                status.innerText = 'Enter a valid name (1-15 characters)';
+                return;
+            }
+
+            try {
+                mintButton.disabled = true;
+                mintButton.innerHTML = 'Checking... <i class="fa fa-spinner fa-spin ml-2"></i>';
+                status.innerText = 'Checking balance and gas...';
+
+                const gdogBalance = await gdogContract.methods.balanceOf(account).call();
+                if (web3.utils.toBN(gdogBalance).lt(web3.utils.toBN(MINT_FEE))) {
+                    status.innerText = 'Insufficient GDOG balance (need 1000 GDOG)';
+                    return;
+                }
+
+                const allowance = await gdogContract.methods.allowance(account, NFT_ADDRESS).call();
+                if (web3.utils.toBN(allowance).lt(web3.utils.toBN(MINT_FEE))) {
+                    const approved = await approveGDOG();
+                    if (!approved) return;
+                }
+
+                mintButton.innerHTML = 'Minting... <i class="fa fa-spinner fa-spin ml-2"></i>';
+                status.innerText = 'Minting NFT...';
+
+                const gasPrice = await web3.eth.getGasPrice();
+                const estimatedGas = await nftContract.methods.mint(mintName).estimateGas({ from: account });
+                const nativeBalance = await web3.eth.getBalance(account);
+                const gasCost = web3.utils.toBN(gasPrice).mul(web3.utils.toBN(estimatedGas));
+                if (web3.utils.toBN(nativeBalance).lt(gasCost)) {
+                    status.innerText = 'Insufficient GT for gas fees';
+                    return;
+                }
+
+                const tx = await nftContract.methods.mint(mintName).send({
+                    from: account,
+                    gas: web3.utils.toHex(Math.min(estimatedGas * 2, 3000000))
+                });
+                await waitForTransaction(tx.transactionHash);
+
+                status.innerText = `NFT "${mintName}.gdog" minted successfully!`;
+                await checkBalances();
+            } catch (error) {
+                status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Mint failed: ${error.message}`;
+                console.error('Mint error:', error);
+            } finally {
+                mintButton.disabled = false;
+                mintButton.innerHTML = 'Mint NFT';
+            }
+        }
+
+        async function redeemNFT() {
+            const status = document.getElementById('networkStatus');
+            const redeemButton = document.getElementById('redeemButton');
+            const tokenId = document.getElementById('tokenId').value.trim();
+
+            if (!web3 || !account) {
+                status.innerText = 'Please connect wallet';
+                return;
+            }
+            if (!tokenId || isNaN(tokenId)) {
+                status.innerText = 'Enter valid Token ID';
+                return;
+            }
+
+            try {
+                redeemButton.disabled = true;
+                redeemButton.innerHTML = 'Redeeming... <i class="fa fa-spinner fa-spin ml-2"></i>';
+                status.innerText = 'Checking Token ID and gas...';
+
+                const owner = await nftContract.methods.ownerOf(tokenId).call();
+                if (owner.toLowerCase() !== account.toLowerCase()) {
+                    status.innerText = 'You are not the owner of this NFT';
+                    return;
+                }
+
+                const gasPrice = await web3.eth.getGasPrice();
+                const estimatedGas = await nftContract.methods.release(tokenId).estimateGas({ from: account });
+                const nativeBalance = await web3.eth.getBalance(account);
+                const gasCost = web3.utils.toBN(gasPrice).mul(web3.utils.toBN(estimatedGas));
+                if (web3.utils.toBN(nativeBalance).lt(gasCost)) {
+                    status.innerText = 'Insufficient GT for gas fees';
+                    return;
+                }
+
+                const tx = await nftContract.methods.release(tokenId).send({
+                    from: account,
+                    gas: web3.utils.toHex(Math.min(estimatedGas * 2, 3000000))
+                });
+                await waitForTransaction(tx.transactionHash);
+
+                status.innerText = 'NFT redeemed successfully!';
+                await checkBalances();
+            } catch (error) {
+                status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Redeem failed: ${error.message}`;
+                console.error('Redeem error:', error);
+            } finally {
+                redeemButton.disabled = false;
+                redeemButton.innerHTML = 'Redeem NFT';
+            }
+        }
+
+        async function batchRedeemNFT() {
+            const status = document.getElementById('networkStatus');
+            const batchRedeemButton = document.getElementById('batchRedeemButton');
+            const checkboxes = document.querySelectorAll('.nft-checkbox:checked');
+
+            if (!web3 || !account) {
+                status.innerText = 'Please connect wallet';
+                return;
+            }
+            if (checkboxes.length === 0) {
+                status.innerText = 'Select at least one NFT';
+                return;
+            }
+
+            try {
+                batchRedeemButton.disabled = true;
+                batchRedeemButton.innerHTML = 'Redeeming... <i class="fa fa-spinner fa-spin ml-2"></i>';
+                status.innerText = 'Batch redeeming NFTs...';
+
+                let nativeBalance = await web3.eth.getBalance(account);
+                const gasPrice = await web3.eth.getGasPrice();
+
+                for (const checkbox of checkboxes) {
+                    const tokenId = checkbox.value;
+                    const owner = await nftContract.methods.ownerOf(tokenId).call();
+                    if (owner.toLowerCase() !== account.toLowerCase()) {
+                        status.innerText = `Token ID ${tokenId} is not your NFT`;
+                        return;
+                    }
+
+                    const estimatedGas = await nftContract.methods.release(tokenId).estimateGas({ from: account });
+                    const gasCost = web3.utils.toBN(gasPrice).mul(web3.utils.toBN(estimatedGas));
+                    if (web3.utils.toBN(nativeBalance).lt(gasCost)) {
+                        status.innerText = 'Insufficient GT for gas fees';
+                        return;
+                    }
+
+                    const tx = await nftContract.methods.release(tokenId).send({
+                        from: account,
+                        gas: web3.utils.toHex(Math.min(estimatedGas * 2, 3000000))
+                    });
+                    await waitForTransaction(tx.transactionHash);
+                    nativeBalance = await web3.eth.getBalance(account);
+                }
+
+                status.innerText = 'Batch redeem successful!';
+                await checkBalances();
+            } catch (error) {
+                status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Batch redeem failed: ${error.message}`;
+                console.error('Batch redeem error:', error);
+            } finally {
+                batchRedeemButton.disabled = false;
+                batchRedeemButton.innerHTML = 'Batch Redeem Selected NFTs';
+            }
+        }
+
+        function copyContract() {
+            const contract = NFT_ADDRESS;
+            navigator.clipboard.writeText(contract).then(() => {
+                const notification = document.createElement('div');
+                notification.className = 'fixed bottom-4 right-4 bg-primary text-white px-4 py-2 rounded-lg shadow-lg z-50';
+                notification.textContent = 'Contract address copied!';
+                document.body.appendChild(notification);
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transition = 'opacity 0.3s';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 2000);
+            });
+        }
+
+        function getNFTImage(tokenId) {
+            return `${IMAGE_BASE_URL}${tokenId}.jpg`;
+        }
+
+        async function downloadNFTImage(tokenId) {
+            const status = document.getElementById('networkStatus');
+            const imageUrl = getNFTImage(tokenId);
+            try {
+                const response = await fetch(imageUrl);
+                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `GdogName_NFT_${tokenId}.jpg`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                status.innerText = `NFT ${tokenId} image downloaded successfully!`;
+            } catch (error) {
+                status.innerText = `Failed to download NFT ${tokenId} image: ${error.message}`;
+            }
+        }
+
+        async function updateNFTList(nftBalance) {
+            const nftList = document.getElementById('nftList');
+            nftList.innerHTML = '';
+            if (!web3 || !account || nftBalance == 0) {
+                nftList.innerHTML = '<li>No NFTs</li>';
+                document.getElementById('batchRedeemButton').disabled = true;
+                return;
+            }
+            try {
+                for (let i = 0; i < nftBalance; i++) {
+                    const tokenId = await nftContract.methods.tokenOfOwnerByIndex(account, i).call();
+                    const tokenName = await nftContract.methods.tokenName(tokenId).call();
+                    const imageUrl = getNFTImage(tokenId);
+                    const li = document.createElement('li');
+                    li.className = 'flex items-center py-2';
+                    li.innerHTML = `
+                        <input type="checkbox" class="nft-checkbox mr-2" value="${tokenId}">
+                        <img src="${imageUrl}" alt="NFT ${tokenName}" class="w-10 h-10 rounded mr-2 cursor-pointer" onerror="this.src='${DEFAULT_IMAGE}'" onclick="window.open('${imageUrl}', '_blank')">
+                        <span>${tokenName} (ID: ${tokenId})</span>
+                        <button class="ml-auto px-2 py-1 bg-secondary text-dark text-sm rounded font-medium hover:bg-secondary/80 transition-all" onclick="downloadNFTImage(${tokenId})">Download</button>
+                    `;
+                    nftList.appendChild(li);
+                }
+                document.getElementById('batchRedeemButton').disabled = false;
+            } catch (error) {
+                nftList.innerHTML = `<li>Query NFTs failed: ${error.message}</li>`;
+                document.getElementById('batchRedeemButton').disabled = true;
+                console.error('NFT list error:', error);
+            }
+        }
+
+        async function checkButtonStatus() {
+            if (!web3 || !account) {
+                document.getElementById('mintButton').disabled = true;
+                document.getElementById('redeemButton').disabled = true;
+                document.getElementById('batchRedeemButton').disabled = true;
+                return;
+            }
+            const mintName = document.getElementById('mintName').value.trim();
+            const tokenId = document.getElementById('tokenId').value.trim();
+            document.getElementById('mintButton').disabled = !mintName || mintName.length > 15;
+            document.getElementById('redeemButton').disabled = !tokenId || isNaN(tokenId);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('connectWalletButton').addEventListener('click', initializeWeb3);
+            document.getElementById('mintButton').addEventListener('click', mintNFT);
+            document.getElementById('redeemButton').addEventListener('click', redeemNFT);
+            document.getElementById('batchRedeemButton').addEventListener('click', batchRedeemNFT);
+            document.getElementById('mintName').addEventListener('input', checkButtonStatus);
+            document.getElementById('tokenId').addEventListener('input', checkButtonStatus);
+
+            const menuToggle = document.getElementById('menuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+            menuToggle.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                menuToggle.innerHTML = mobileMenu.classList.contains('hidden')
+                    ? '<i class="fa fa-bars"></i>'
+                    : '<i class="fa fa-times"></i>';
+            });
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    mobileMenu.classList.add('hidden');
+                    menuToggle.innerHTML = '<i class="fa fa-bars"></i>';
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('bg-dark/95', 'shadow-lg');
+                } else {
+                    navbar.classList.remove('bg-dark/95', 'shadow-lg');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
