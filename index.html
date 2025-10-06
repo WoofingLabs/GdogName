@@ -132,8 +132,7 @@
         const GDOG = '0xA037355662d34D9B57dE209E22544a4862F5A30c';
         const NFT_ADDRESS = '0x45EEed1D43b27CA7d47317d3E4D142b1122B20FF';
         const MINT_FEE = '1000000000000000000000'; // 1000 GDOG in wei
-        const IMAGE_BASE_URL = 'https://www.gdoggate.com/nft/';
-        const DEFAULT_IMAGE = 'https://woofinglabs.github.io/GdogToTheMoon/images/gdog_logo.png';
+        const MAX_APPROVAL = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
         const erc20Abi = [
             {"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"remaining","type":"uint256"}],"stateMutability":"view","type":"function"},
@@ -266,14 +265,14 @@
                 mintButton.innerHTML = 'Approving... <i class="fa fa-spinner fa-spin ml-2"></i>';
                 status.innerText = 'Approving GDOG...';
                 const gasPrice = await web3.eth.getGasPrice();
-                const estimatedGas = await gdogContract.methods.approve(NFT_ADDRESS, MINT_FEE).estimateGas({ from: account });
+                const estimatedGas = await gdogContract.methods.approve(NFT_ADDRESS, MAX_APPROVAL).estimateGas({ from: account });
                 const nativeBalance = await web3.eth.getBalance(account);
                 const gasCost = web3.utils.toBN(gasPrice).mul(web3.utils.toBN(estimatedGas));
                 if (web3.utils.toBN(nativeBalance).lt(gasCost)) {
                     status.innerText = 'Insufficient GT for gas fees';
                     return false;
                 }
-                const tx = await gdogContract.methods.approve(NFT_ADDRESS, MINT_FEE).send({
+                const tx = await gdogContract.methods.approve(NFT_ADDRESS, MAX_APPROVAL).send({
                     from: account,
                     gas: web3.utils.toHex(Math.min(estimatedGas * 2, 1000000))
                 });
@@ -472,28 +471,14 @@
             });
         }
 
-        function getNFTImage(tokenId) {
-            return `${IMAGE_BASE_URL}${tokenId}.jpg`;
-        }
-
-        async function downloadNFTImage(tokenId) {
-            const status = document.getElementById('networkStatus');
-            const imageUrl = getNFTImage(tokenId);
+        async function getNFTImage(tokenId) {
             try {
-                const response = await fetch(imageUrl);
-                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `GdogName_NFT_${tokenId}.jpg`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-                status.innerText = `NFT ${tokenId} image downloaded successfully!`;
+                const tokenURI = await nftContract.methods.tokenURI(tokenId).call();
+                const json = JSON.parse(atob(tokenURI.split('data:application/json;base64,')[1]));
+                return json.image; // Returns the data:image/svg+xml;base64,... URL
             } catch (error) {
-                status.innerText = `Failed to download NFT ${tokenId} image: ${error.message}`;
+                console.error(`Failed to fetch tokenURI for token ${tokenId}:`, error);
+                return 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="100%" height="100%" fill="#004FD9"/><text x="150" y="150" fill="#FFFFFF" style="dominant-baseline:middle;text-anchor:middle;font-size:20px;">Error</text></svg>');
             }
         }
 
@@ -509,14 +494,13 @@
                 for (let i = 0; i < nftBalance; i++) {
                     const tokenId = await nftContract.methods.tokenOfOwnerByIndex(account, i).call();
                     const tokenName = await nftContract.methods.tokenName(tokenId).call();
-                    const imageUrl = getNFTImage(tokenId);
+                    const imageUrl = await getNFTImage(tokenId);
                     const li = document.createElement('li');
                     li.className = 'flex items-center py-2';
                     li.innerHTML = `
                         <input type="checkbox" class="nft-checkbox mr-2" value="${tokenId}">
-                        <img src="${imageUrl}" alt="NFT ${tokenName}" class="w-10 h-10 rounded mr-2 cursor-pointer" onerror="this.src='${DEFAULT_IMAGE}'" onclick="window.open('${imageUrl}', '_blank')">
+                        <img src="${imageUrl}" alt="NFT ${tokenName}" class="w-10 h-10 rounded mr-2 cursor-pointer" onclick="window.open('${imageUrl}', '_blank')">
                         <span>${tokenName} (ID: ${tokenId})</span>
-                        <button class="ml-auto px-2 py-1 bg-secondary text-dark text-sm rounded font-medium hover:bg-secondary/80 transition-all" onclick="downloadNFTImage(${tokenId})">Download</button>
                     `;
                     nftList.appendChild(li);
                 }
