@@ -99,7 +99,6 @@
                     <div>
                         <label class="block text-left text-light-gray mb-2">Mint NFT Name</label>
                         <input type="text" id="mintName" placeholder="Enter name (e.g., coolname)" class="w-full px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
-                        <p id="nameStatus" class="text-light-gray text-sm mt-1"></p>
                     </div>
                     <div>
                         <label class="block text-left text-light-gray mb-2">Redeem NFT Token ID</label>
@@ -238,7 +237,6 @@
                 document.getElementById('batchRedeemButton').disabled = true;
                 document.getElementById('balanceStatus').innerText = 'GT Balance: 0 | GDOG Balance: 0 | NFTs Owned: 0';
                 document.getElementById('nftList').innerHTML = '<li>Wallet not connected</li>';
-                document.getElementById('nameStatus').innerText = '';
                 return;
             }
             try {
@@ -256,7 +254,6 @@
                 document.getElementById('batchRedeemButton').disabled = true;
                 document.getElementById('balanceStatus').innerText = 'Query failed';
                 document.getElementById('nftList').innerHTML = `<li>Query failed: ${error.message}</li>`;
-                document.getElementById('nameStatus').innerText = '';
                 console.error('Balance check error:', error);
             }
         }
@@ -340,8 +337,6 @@
                 await waitForTransaction(tx.transactionHash);
 
                 status.innerText = `NFT "${mintName}.gdog" minted successfully!`;
-                document.getElementById('mintName').value = ''; // 清空输入框
-                document.getElementById('nameStatus').innerText = '';
                 await checkBalances();
             } catch (error) {
                 status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Mint failed: ${error.message}`;
@@ -393,7 +388,6 @@
                 await waitForTransaction(tx.transactionHash);
 
                 status.innerText = 'NFT redeemed successfully!';
-                document.getElementById('tokenId').value = ''; // 清空输入框
                 await checkBalances();
             } catch (error) {
                 status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Redeem failed: ${error.message}`;
@@ -450,7 +444,6 @@
                 }
 
                 status.innerText = 'Batch redeem successful!';
-                document.getElementById('tokenId').value = ''; // 清空输入框
                 await checkBalances();
             } catch (error) {
                 status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Batch redeem failed: ${error.message}`;
@@ -486,31 +479,6 @@
             } catch (error) {
                 console.error(`Failed to fetch tokenURI for token ${tokenId}:`, error);
                 return 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="100%" height="100%" fill="#004FD9"/><text x="150" y="150" fill="#FFFFFF" style="dominant-baseline:middle;text-anchor:middle;font-size:20px;">Error</text></svg>');
-            }
-        }
-
-        async function checkNameAvailability(name) {
-            if (!web3 || !account || !name || name.length > 15) {
-                document.getElementById('nameStatus').innerText = '';
-                return false;
-            }
-            try {
-                // GdogName 合约的 toLower 函数在链上处理小写转换
-                const tokenId = await nftContract.methods.getTokenIdById(name.toLowerCase()).call();
-                if (tokenId != 0) {
-                    document.getElementById('nameStatus').innerText = 'Name already minted';
-                    document.getElementById('nameStatus').className = 'text-red-500 text-sm mt-1';
-                    return false;
-                } else {
-                    document.getElementById('nameStatus').innerText = 'Name available';
-                    document.getElementById('nameStatus').className = 'text-secondary text-sm mt-1';
-                    return true;
-                }
-            } catch (error) {
-                document.getElementById('nameStatus').innerText = 'Error checking name availability';
-                document.getElementById('nameStatus').className = 'text-red-500 text-sm mt-1';
-                console.error('Name check error:', error);
-                return false;
             }
         }
 
@@ -553,8 +521,7 @@
             }
             const mintName = document.getElementById('mintName').value.trim();
             const tokenId = document.getElementById('tokenId').value.trim();
-            const isNameAvailable = await checkNameAvailability(mintName);
-            document.getElementById('mintButton').disabled = !mintName || mintName.length > 15 || !isNameAvailable;
+            document.getElementById('mintButton').disabled = !mintName || mintName.length > 15;
             document.getElementById('redeemButton').disabled = !tokenId || isNaN(tokenId);
         }
 
