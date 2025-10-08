@@ -160,9 +160,10 @@
             }
             try {
                 const gateLayerChainId = '0x2778';
-                let chainId = await provider.request({ method: 'eth_chainId' });
-                chainId = `0x${Number(chainId).toString(16)}`;
-                console.log('Detected Chain ID:', chainId); // 调试日志
+                let rawChainId = await provider.request({ method: 'eth_chainId' });
+                console.log('Raw Chain ID:', rawChainId); // 调试原始返回值
+                let chainId = rawChainId.startsWith('0x') ? rawChainId : `0x${Number(rawChainId).toString(16)}`;
+                console.log('Normalized Chain ID:', chainId); // 调试规范化后的值
                 if (chainId !== gateLayerChainId) {
                     alert('Please switch to the Gate Layer network (Chain ID: 10088) in your wallet.\nYou can manually add Gate Layer with the following details:\n- RPC URL: https://gatelayer-mainnet.gatenode.cc\n- Chain ID: 10088\n- Symbol: GT\n- Block Explorer: https://www.gatescan.org/gatelayer/');
                     return;
