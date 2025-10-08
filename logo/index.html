@@ -135,9 +135,7 @@
 
         function detectWallet() {
             const provider = window.ethereum;
-            if (!provider) {
-                return { name: null, provider: null };
-            }
+            if (!provider) return { name: null, provider: null };
             if (provider.isMetaMask) return { name: 'MetaMask', provider };
             if (provider.isOkxWallet) return { name: 'OKX Wallet', provider };
             if (provider.isTrustWallet) return { name: 'Trust Wallet', provider };
@@ -160,31 +158,6 @@
             }
         }
 
-        async function switchNetwork(chain) {
-            const chainConfig = chains[chain];
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: `0x${chainConfig.chainId.toString(16)}` }]
-                });
-            } catch (switchError) {
-                if (switchError.code === 4902) {
-                    await window.ethereum.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [{
-                            chainId: `0x${chainConfig.chainId.toString(16)}`,
-                            chainName: chainConfig.chainName,
-                            rpcUrls: [chainConfig.rpcUrl],
-                            nativeCurrency: chainConfig.nativeCurrency,
-                            blockExplorerUrls: [chainConfig.blockExplorer]
-                        }]
-                    });
-                } else {
-                    throw switchError;
-                }
-            }
-        }
-
         async function addToken() {
             const { provider } = detectWallet();
             if (!provider) {
@@ -195,12 +168,8 @@
                 const gateLayerChainId = '0x2778';
                 const chainId = await provider.request({ method: 'eth_chainId' });
                 if (chainId !== gateLayerChainId) {
-                    await switchNetwork('GateLayer');
-                    const newChainId = await provider.request({ method: 'eth_chainId' });
-                    if (newChainId !== gateLayerChainId) {
-                        alert('Please switch to the Gate Layer network (Chain ID: 10088) in your wallet.\nYou can manually add Gate Layer with the following details:\n- RPC URL: https://gatelayer-rpc.gatenode.cc\n- Chain ID: 10088\n- Symbol: GT\n- Block Explorer: https://www.gatescan.org/gatelayer/');
-                        return;
-                    }
+                    alert('Please switch to the Gate Layer network (Chain ID: 10088) in your wallet.\nYou can manually add Gate Layer with the following details:\n- RPC URL: https://gatelayer-rpc.gatenode.cc\n- Chain ID: 10088\n- Symbol: GT\n- Block Explorer: https://www.gatescan.org/gatelayer/');
+                    return;
                 }
                 const wasAdded = await provider.request({
                     method: 'wallet_watchAsset',
@@ -220,6 +189,7 @@
                     alert('User cancelled adding token.');
                 }
             } catch (error) {
+                console.error('Error adding token:', error);
                 alert('Failed to add token. Please ensure you are on the Gate Layer network and your wallet supports adding tokens.');
             }
         }
