@@ -290,7 +290,7 @@
                 }
                 const tx = await babyGdogContract.methods.mint().send({
                     from: account,
-                    gas: web3.utils.toHex(Math.min(estimatedGas * 2, 3000000))
+                    gas: web3.utils.toHex(Math.min(estimatedGas * 2, 8000000))
                 });
                 await waitForTransaction(tx.transactionHash);
                 status.innerText = 'BABYGDOG minted successfully!';
@@ -341,7 +341,7 @@
                 }
                 const tx = await babyGdogContract.methods.depositLUCKY(amountWei).send({
                     from: account,
-                    gas: web3.utils.toHex(Math.min(estimatedGas * 2, 3000000))
+                    gas: web3.utils.toHex(Math.min(estimatedGas * 2, 8000000))
                 });
                 await waitForTransaction(tx.transactionHash);
                 status.innerText = 'LUCKY deposited successfully!';
@@ -377,7 +377,7 @@
                 }
                 const tx = await babyGdogContract.methods.emergencyWithdraw(LUCKY_ADDRESS).send({
                     from: account,
-                    gas: web3.utils.toHex(Math.min(estimatedGas * 2, 3000000))
+                    gas: web3.utils.toHex(Math.min(estimatedGas * 2, 8000000))
                 });
                 await waitForTransaction(tx.transactionHash);
                 status.innerText = 'Tokens withdrawn successfully!';
