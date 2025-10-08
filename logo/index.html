@@ -123,16 +123,6 @@
             logo: "https://woofinglabs.github.io/GdogToTheMoon/images/gdog_logo.png"
         };
 
-        const chains = {
-            GateLayer: {
-                chainId: 10088,
-                chainName: 'Gate Layer',
-                rpcUrl: 'https://gatelayer-mainnet.gatenode.cc',
-                blockExplorer: 'https://www.gatescan.org/gatelayer/',
-                nativeCurrency: { name: 'GT', symbol: 'GT', decimals: 18 }
-            }
-        };
-
         function detectWallet() {
             const provider = window.ethereum;
             if (!provider) return { name: null, provider: null };
