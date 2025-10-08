@@ -3,28 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add GDOG to MetaMask</title>
+    <title>Add Tokens to MetaMask</title>
     <link rel="icon" type="image/png" href="https://woofinglabs.github.io/GdogToTheMoon/images/gdog_logo.png">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-900 text-white font-sans min-h-screen flex flex-col items-center justify-center p-4">
     <header class="w-full max-w-md text-center mb-6">
-        <img src="https://woofinglabs.github.io/GdogToTheMoon/images/gdog_logo.png" alt="GDOG Logo" class="w-24 h-24 mx-auto rounded-full border-2 border-green-400">
-        <h1 class="text-3xl font-bold text-blue-400 mt-2">Add GDOG to MetaMask</h1>
+        <img src="https://woofinglabs.github.io/GdogToTheMoon/images/gdog_logo.png" alt="Logo" class="w-24 h-24 mx-auto rounded-full border-2 border-green-400">
+        <h1 class="text-3xl font-bold text-blue-400 mt-2">Add Tokens to MetaMask</h1>
     </header>
 
     <main class="w-full max-w-md bg-gray-800 p-6 rounded-lg shadow-lg">
         <p id="walletInfo" class="text-sm text-gray-400 mb-4">Detecting wallet...</p>
-        <div class="mb-4">
-            <p class="text-sm text-gray-400">Contract: <span class="font-mono">0xA037355662d34D9B57dE209E22544a4862F5A30c</span></p>
-            <button class="mt-2 px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-500" onclick="copyContract()">Copy Address</button>
-        </div>
-        <div class="flex items-center justify-between mb-4">
-            <div>
-                <p class="text-sm text-gray-400">Symbol: GDOG</p>
-                <p class="text-sm text-gray-400">Decimals: 18</p>
+        <div id="tokenList">
+            <div class="mb-4">
+                <p class="text-sm text-gray-400">Contract: <span class="font-mono">0xA037355662d34D9B57dE209E22544a4862F5A30c</span></p>
+                <p class="text-sm text-gray-400">Symbol: GDOG | Decimals: 18</p>
+                <button class="mt-2 px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-500" onclick="copyContract('0xA037355662d34D9B57dE209E22544a4862F5A30c')">Copy Address</button>
+                <button class="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-500" onclick="addToken('GDOG')">Add GDOG</button>
             </div>
-            <button id="addTokenButton" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 disabled:bg-gray-500" disabled>Add to MetaMask</button>
+            <div class="mb-4">
+                <p class="text-sm text-gray-400">Contract: <span class="font-mono">0x6803b8E93b13941F6B73b82E324B80251B3dE338</span></p>
+                <p class="text-sm text-gray-400">Symbol: WGT | Decimals: 18</p>
+                <button class="mt-2 px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-500" onclick="copyContract('0x6803b8E93b13941F6B73b82E324B80251B3dE338')">Copy Address</button>
+                <button class="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-500" onclick="addToken('WGT')">Add WGT</button>
+            </div>
+            <div class="mb-4">
+                <p class="text-sm text-gray-400">Contract: <span class="font-mono">0x37aa19958bE45613D18B98F3ebF693FFbf11ec02</span></p>
+                <p class="text-sm text-gray-400">Symbol: MIMA | Decimals: 18</p>
+                <button class="mt-2 px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-500" onclick="copyContract('0x37aa19958bE45613D18B98F3ebF693FFbf11ec02')">Copy Address</button>
+                <button class="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-500" onclick="addToken('MIMA')">Add MIMA</button>
+            </div>
+            <div class="mb-4">
+                <p class="text-sm text-gray-400">Contract: <span class="font-mono">0x448b6637bc794366D95D26F2EC5D076d5f1293DC</span></p>
+                <p class="text-sm text-gray-400">Symbol: GCAT | Decimals: 18</p>
+                <button class="mt-2 px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-500" onclick="copyContract('0x448b6637bc794366D95D26F2EC5D076d5f1293DC')">Copy Address</button>
+                <button class="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-500" onclick="addToken('GCAT')">Add GCAT</button>
+            </div>
+            <div class="mb-4">
+                <p class="text-sm text-gray-400">Contract: <span class="font-mono">0x8e0474a49163f1764d56a9fd9342b87f1d1aec00</span></p>
+                <p class="text-sm text-gray-400">Symbol: LUCKY | Decimals: 18</p>
+                <button class="mt-2 px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-500" onclick="copyContract('0x8e0474a49163f1764d56a9fd9342b87f1d1aec00')">Copy Address</button>
+                <button class="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-500" onclick="addToken('LUCKY')">Add LUCKY</button>
+            </div>
+            <div class="mb-4">
+                <p class="text-sm text-gray-400">Contract: <span class="font-mono">0xa930bbe6062cb0d67a2152f30a63adb846e58fe0</span></p>
+                <p class="text-sm text-gray-400">Symbol: GRABBIT | Decimals: 1</p>
+                <button class="mt-2 px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-500" onclick="copyContract('0xa930bbe6062cb0d67a2152f30a63adb846e58fe0')">Copy Address</button>
+                <button class="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-500" onclick="addToken('GRABBIT')">Add GRABBIT</button>
+            </div>
+            <div class="mb-4">
+                <p class="text-sm text-gray-400">Contract: <span class="font-mono">0x8b78ddf4c0908f3ddb23f27d8bd06b9daab8c7e2</span></p>
+                <p class="text-sm text-gray-400">Symbol: TEST | Decimals: 18</p>
+                <button class="mt-2 px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-500" onclick="copyContract('0x8b78ddf4c0908f3ddb23f27d8bd06b9daab8c7e2')">Copy Address</button>
+                <button class="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-500" onclick="addToken('TEST')">Add TEST</button>
+            </div>
         </div>
         <div id="networkStatus" class="text-sm text-gray-400 mb-2">Current Chain ID: <span id="currentChainId">N/A</span></div>
         <button id="switchNetworkButton" class="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500 mb-4" onclick="switchNetwork()">Switch to Gate Layer (10088)</button>
@@ -43,19 +76,22 @@
     </main>
 
     <footer class="mt-auto text-center text-gray-500 text-xs py-4">
-        <p>© 2025 GDOG. DYOR and invest responsibly.</p>
+        <p>© 2025 Tokens. DYOR and invest responsibly.</p>
     </footer>
 
     <script>
-        const token = {
-            address: "0xA037355662d34D9B57dE209E22544a4862F5A30c",
-            symbol: "GDOG",
-            decimals: 18,
-            logo: "https://woofinglabs.github.io/GdogToTheMoon/images/gdog_logo.png"
+        const tokens = {
+            GDOG: { address: "0xA037355662d34D9B57dE209E22544a4862F5A30c", symbol: "GDOG", decimals: 18, logo: "https://woofinglabs.github.io/GdogToTheMoon/images/gdog_logo.png" },
+            WGT: { address: "0x6803b8E93b13941F6B73b82E324B80251B3dE338", symbol: "WGT", decimals: 18, logo: "https://www.woofswap.finance/image/tokens/GT.png" },
+            MIMA: { address: "0x37aa19958bE45613D18B98F3ebF693FFbf11ec02", symbol: "MIMA", decimals: 18, logo: "https://www.woofswap.finance/image/tokens/mima.png" },
+            GCAT: { address: "0x448b6637bc794366D95D26F2EC5D076d5f1293DC", symbol: "GCAT", decimals: 18, logo: "https://www.woofswap.finance/image/tokens/gcat.png" },
+            LUCKY: { address: "0x8e0474a49163f1764d56a9fd9342b87f1d1aec00", symbol: "LUCKY", decimals: 18, logo: "https://www.woofswap.finance/image/tokens/lucky.jpg" },
+            GRABBIT: { address: "0xa930bbe6062cb0d67a2152f30a63adb846e58fe0", symbol: "GRABBIT", decimals: 1, logo: "https://raw.githubusercontent.com/WoofingLabs/Grabbit/refs/heads/main/images/1.png" },
+            TEST: { address: "0x8b78ddf4c0908f3ddb23f27d8bd06b9daab8c7e2", symbol: "TEST", decimals: 18, logo: "https://www.woofswap.finance/image/tokens/GT.png" }
         };
 
         const gateLayer = {
-            chainId: '0x2768', // 10088 in hex
+            chainId: '0x2768',
             chainName: 'Gate Layer',
             rpcUrls: ['https://gatelayer-mainnet.gatenode.cc'],
             nativeCurrency: { name: 'GT', symbol: 'GT', decimals: 18 },
@@ -64,21 +100,20 @@
 
         function detectWallet() {
             const provider = window.ethereum;
-            console.log('Ethereum provider:', provider);
             return provider && provider.isMetaMask ? { name: 'MetaMask', provider } : { name: null, provider: null };
         }
 
         function updateWalletInfo() {
             const { name, provider } = detectWallet();
             const walletInfo = document.getElementById('walletInfo');
-            const addButton = document.getElementById('addTokenButton');
+            const tokenButtons = document.querySelectorAll('#tokenList button.bg-blue-600');
             if (name === 'MetaMask') {
                 walletInfo.textContent = 'Detected: MetaMask';
-                addButton.disabled = false;
+                tokenButtons.forEach(btn => btn.disabled = false);
                 checkNetwork(provider);
             } else {
                 walletInfo.textContent = 'Please install MetaMask.';
-                addButton.disabled = true;
+                tokenButtons.forEach(btn => btn.disabled = true);
             }
         }
 
@@ -87,8 +122,6 @@
                 const rawChainId = await provider.request({ method: 'eth_chainId' });
                 const chainId = rawChainId.startsWith('0x') ? rawChainId : `0x${Number(rawChainId).toString(16)}`;
                 document.getElementById('currentChainId').textContent = chainId;
-                console.log('Raw Chain ID:', rawChainId, 'Normalized:', chainId);
-
                 const switchButton = document.getElementById('switchNetworkButton');
                 const manualGuide = document.getElementById('manualGuide');
                 if (chainId === gateLayer.chainId) {
@@ -100,7 +133,6 @@
                     alert(`Wrong Chain ID: ${chainId}. Please switch to ${gateLayer.chainId} (10088).`);
                 }
             } catch (error) {
-                console.error('Network check error:', error);
                 alert('Failed to check network. Ensure MetaMask is connected.');
             }
         }
@@ -130,17 +162,15 @@
                         });
                         alert('Added Gate Layer network. Switch to it in MetaMask and refresh.');
                     } catch (addError) {
-                        console.error('Add network error:', addError);
                         alert('Failed to add network. Use manual guide below.');
                     }
                 } else {
-                    console.error('Switch network error:', switchError);
                     alert('Switch failed. Use manual guide below.');
                 }
             }
         }
 
-        async function addToken() {
+        async function addToken(tokenSymbol) {
             const { provider } = detectWallet();
             if (!provider) return alert('MetaMask not detected!');
             try {
@@ -150,6 +180,7 @@
                     alert('Please switch to Chain ID 10088 first.');
                     return;
                 }
+                const token = tokens[tokenSymbol];
                 const wasAdded = await provider.request({
                     method: 'wallet_watchAsset',
                     params: {
@@ -158,24 +189,21 @@
                     }
                 });
                 if (wasAdded) {
-                    alert('GDOG added to MetaMask with Logo!');
+                    alert(`${tokenSymbol} added to MetaMask with Logo!`);
                 } else {
                     alert('Cancelled. Use manual guide below.');
                 }
             } catch (error) {
-                console.error('Add token error:', error);
                 alert('Add failed. Use manual guide below.');
             }
         }
 
-        function copyContract() {
-            navigator.clipboard.writeText(token.address).then(() => alert('Address copied!'));
+        function copyContract(address) {
+            navigator.clipboard.writeText(address).then(() => alert('Address copied!'));
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             updateWalletInfo();
-            document.getElementById('addTokenButton').addEventListener('click', addToken);
-            document.getElementById('switchNetworkButton').addEventListener('click', switchNetwork);
         });
     </script>
 </body>
