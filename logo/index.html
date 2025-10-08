@@ -138,23 +138,14 @@
             if (!provider) {
                 return { name: null, provider: null };
             }
-            if (provider.isMetaMask) {
-                return { name: 'MetaMask', provider };
-            } else if (provider.isOkxWallet) {
-                return { name: 'OKX Wallet', provider };
-            } else if (provider.isTrustWallet) {
-                return { name: 'Trust Wallet', provider };
-            } else if (provider.isCoinbaseWallet) {
-                return { name: 'Coinbase Wallet', provider };
-            } else if (provider.isBitget) {
-                return { name: 'Bitget Wallet', provider };
-            } else if (provider.isRabby) {
-                return { name: 'Rabby Wallet', provider };
-            } else if (window.walletConnect) {
-                return { name: 'WalletConnect', provider: window.walletConnect };
-            } else {
-                return { name: 'Unknown Wallet', provider };
-            }
+            if (provider.isMetaMask) return { name: 'MetaMask', provider };
+            if (provider.isOkxWallet) return { name: 'OKX Wallet', provider };
+            if (provider.isTrustWallet) return { name: 'Trust Wallet', provider };
+            if (provider.isCoinbaseWallet) return { name: 'Coinbase Wallet', provider };
+            if (provider.isBitget) return { name: 'Bitget Wallet', provider };
+            if (provider.isRabby) return { name: 'Rabby Wallet', provider };
+            if (window.walletConnect) return { name: 'WalletConnect', provider: window.walletConnect };
+            return { name: 'Unknown Wallet', provider };
         }
 
         function updateWalletInfo() {
@@ -204,8 +195,12 @@
                 const gateLayerChainId = '0x2778';
                 const chainId = await provider.request({ method: 'eth_chainId' });
                 if (chainId !== gateLayerChainId) {
-                    alert('Please switch to the Gate Layer network (Chain ID: 10088) in your wallet to add this token.\nYou can manually add Gate Layer with the following details:\n- RPC URL: https://gatelayer-rpc.gatenode.cc\n- Chain ID: 10088\n- Symbol: GT\n- Block Explorer: https://www.gatescan.org/gatelayer/');
-                    return;
+                    await switchNetwork('GateLayer');
+                    const newChainId = await provider.request({ method: 'eth_chainId' });
+                    if (newChainId !== gateLayerChainId) {
+                        alert('Please switch to the Gate Layer network (Chain ID: 10088) in your wallet.\nYou can manually add Gate Layer with the following details:\n- RPC URL: https://gatelayer-rpc.gatenode.cc\n- Chain ID: 10088\n- Symbol: GT\n- Block Explorer: https://www.gatescan.org/gatelayer/');
+                        return;
+                    }
                 }
                 const wasAdded = await provider.request({
                     method: 'wallet_watchAsset',
@@ -238,9 +233,7 @@
                 setTimeout(() => {
                     notification.style.opacity = '0';
                     notification.style.transition = 'opacity 0.3s';
-                    setTimeout(() => {
-                        document.body.removeChild(notification);
-                    }, 300);
+                    setTimeout(() => document.body.removeChild(notification), 300);
                 }, 2000);
             });
         }
@@ -261,9 +254,7 @@
                     e.preventDefault();
                     mobileMenu.classList.add('hidden');
                     menuToggle.innerHTML = '<i class="fa fa-bars"></i>';
-                    document.querySelector(this.getAttribute('href')).scrollIntoView({
-                        behavior: 'smooth'
-                    });
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
                 });
             });
             const navbar = document.getElementById('navbar');
