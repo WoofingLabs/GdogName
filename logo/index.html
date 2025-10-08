@@ -156,7 +156,10 @@
             }
             try {
                 const gateLayerChainId = '0x2778';
-                const chainId = await provider.request({ method: 'eth_chainId' });
+                let chainId = await provider.request({ method: 'eth_chainId' });
+                // 规范化 chainId 为十六进制字符串
+                chainId = `0x${Number(chainId).toString(16)}`;
+                console.log('Detected Chain ID:', chainId); // 调试日志
                 if (chainId !== gateLayerChainId) {
                     alert('Please switch to the Gate Layer network (Chain ID: 10088) in your wallet.\nYou can manually add Gate Layer with the following details:\n- RPC URL: https://gatelayer-mainnet.gatenode.cc\n- Chain ID: 10088\n- Symbol: GT\n- Block Explorer: https://www.gatescan.org/gatelayer/');
                     return;
@@ -180,7 +183,7 @@
                 }
             } catch (error) {
                 console.error('Error adding token:', error);
-                alert('Failed to add token. Please ensure you are on the Gate Layer network and your wallet supports adding tokens.');
+                alert('Failed to add token. Please ensure you are on the Gate Layer network and your wallet supports adding tokens. Check console for details.');
             }
         }
 
@@ -192,40 +195,4 @@
                 document.body.appendChild(notification);
                 setTimeout(() => {
                     notification.style.opacity = '0';
-                    notification.style.transition = 'opacity 0.3s';
-                    setTimeout(() => document.body.removeChild(notification), 300);
-                }, 2000);
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            updateWalletInfo();
-            document.getElementById('addTokenButton').addEventListener('click', addToken);
-            const menuToggle = document.getElementById('menuToggle');
-            const mobileMenu = document.getElementById('mobileMenu');
-            menuToggle.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-                menuToggle.innerHTML = mobileMenu.classList.contains('hidden')
-                    ? '<i class="fa fa-bars"></i>'
-                    : '<i class="fa fa-times"></i>';
-            });
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    mobileMenu.classList.add('hidden');
-                    menuToggle.innerHTML = '<i class="fa fa-bars"></i>';
-                    document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
-                });
-            });
-            const navbar = document.getElementById('navbar');
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 50) {
-                    navbar.classList.add('bg-dark/95', 'shadow-lg');
-                } else {
-                    navbar.classList.remove('bg-dark/95', 'shadow-lg');
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+                    notification.style.transition = '
