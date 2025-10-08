@@ -125,7 +125,10 @@
 
         function detectWallet() {
             const provider = window.ethereum;
-            if (!provider) return { name: null, provider: null };
+            console.log('Ethereum provider:', provider); // 调试日志
+            if (!provider) {
+                return { name: null, provider: null };
+            }
             if (provider.isMetaMask) return { name: 'MetaMask', provider };
             if (provider.isOkxWallet) return { name: 'OKX Wallet', provider };
             if (provider.isTrustWallet) return { name: 'Trust Wallet', provider };
@@ -138,12 +141,13 @@
 
         function updateWalletInfo() {
             const walletInfo = document.getElementById('walletInfo');
-            const { name } = detectWallet();
+            const { name, provider } = detectWallet();
+            console.log('Wallet detection result:', { name, provider }); // 调试日志
             if (name) {
                 walletInfo.textContent = `Detected wallet: ${name}`;
                 document.getElementById('addTokenButton').textContent = `Add to ${name}`;
             } else {
-                walletInfo.textContent = 'No wallet detected. Please install a compatible wallet (e.g., MetaMask, OKX Wallet, Trust Wallet).';
+                walletInfo.textContent = 'No wallet detected. Please install a compatible wallet (e.g., MetaMask, OKX Wallet, Trust Wallet) and ensure it is connected.';
                 document.getElementById('addTokenButton').textContent = 'Add to Wallet';
             }
         }
@@ -151,13 +155,12 @@
         async function addToken() {
             const { provider } = detectWallet();
             if (!provider) {
-                alert('Please install a compatible wallet (e.g., MetaMask, OKX Wallet, Trust Wallet)!');
+                alert('Please install a compatible wallet (e.g., MetaMask, OKX Wallet, Trust Wallet) and ensure it is connected!');
                 return;
             }
             try {
                 const gateLayerChainId = '0x2778';
                 let chainId = await provider.request({ method: 'eth_chainId' });
-                // 规范化 chainId 为十六进制字符串
                 chainId = `0x${Number(chainId).toString(16)}`;
                 console.log('Detected Chain ID:', chainId); // 调试日志
                 if (chainId !== gateLayerChainId) {
@@ -195,4 +198,40 @@
                 document.body.appendChild(notification);
                 setTimeout(() => {
                     notification.style.opacity = '0';
-                    notification.style.transition = '
+                    notification.style.transition = 'opacity 0.3s';
+                    setTimeout(() => document.body.removeChild(notification), 300);
+                }, 2000);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateWalletInfo();
+            document.getElementById('addTokenButton').addEventListener('click', addToken);
+            const menuToggle = document.getElementById('menuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+            menuToggle.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                menuToggle.innerHTML = mobileMenu.classList.contains('hidden')
+                    ? '<i class="fa fa-bars"></i>'
+                    : '<i class="fa fa-times"></i>';
+            });
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    mobileMenu.classList.add('hidden');
+                    menuToggle.innerHTML = '<i class="fa fa-bars"></i>';
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('bg-dark/95', 'shadow-lg');
+                } else {
+                    navbar.classList.remove('bg-dark/95', 'shadow-lg');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
