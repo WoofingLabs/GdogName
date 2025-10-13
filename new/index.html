@@ -268,7 +268,7 @@
                     status.innerText = 'Insufficient GT for gas fees';
                     return false;
                 }
-                const tx = await gdogContract.methods.approve(NFT_ADDRESS, MAX_APPROAL).send({
+                const tx = await gdogContract.methods.approve(NFT_ADDRESS, MAX_APPROVAL).send({
                     from: account,
                     gas: web3.utils.toHex(Math.min(estimatedGas * 2, 1000000))
                 });
