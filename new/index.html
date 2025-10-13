@@ -91,7 +91,7 @@
                     <p id="balanceStatus" class="text-light-gray text-sm">GT Balance: 0 | GDOG Balance: 0 | NFTs Owned: 0</p>
                     <div>
                         <label class="block text-left text-light-gray mb-2">Mint NFT Name</label>
-                        <input type="text" id="mintName" placeholder="Enter name (e.g., coolname, 😊, 中文)" class="w-full px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
+                        <input type="text" id="mintName" placeholder="Enter name (e.g., 0, test, 😊, 中文)" class="w-full px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
                         <p id="nameStatus" class="text-light-gray text-sm mt-1"></p>
                     </div>
                     <div>
@@ -124,7 +124,7 @@
     <script src="https://cdn.jsdelivr.net/npm/web3@1.7.0/dist/web3.min.js"></script>
     <script>
         const GDOG = '0xf6D9Cf57e20bA0d33372E8998A9424aa53411E04';
-        const NFT_ADDRESS = '0xE78682D62238e87494386dA733BFF67E4EFbd5A8';
+        const NFT_ADDRESS = '0xEC3dE629192b562e5a36970C2CD4f18620749c85';
         const MINT_FEE = '100000000000000000000000';
         const MAX_APPROVAL = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
@@ -268,7 +268,7 @@
                     status.innerText = 'Insufficient GT for gas fees';
                     return false;
                 }
-                const tx = await gdogContract.methods.approve(NFT_ADDRESS, MAX_APPROVAL).send({
+                const tx = await gdogContract.methods.approve(NFT_ADDRESS, MAX_APPROAL).send({
                     from: account,
                     gas: web3.utils.toHex(Math.min(estimatedGas * 2, 1000000))
                 });
