@@ -76,7 +76,7 @@
                 <img src="https://woofinglabs.github.io/GdogToTheMoon/images/gdog_logo.png" alt="GDOG Logo" class="w-full h-full object-cover rounded-full border-4 border-secondary/50 glow-border">
             </div>
             <h1 class="font-display text-5xl md:text-7xl mb-6 text-primary text-shadow-glow">Gdogarmy NFT Operations</h1>
-            <p class="text-xl md:text-2xl text-light-gray max-w-3xl mx-auto mb-10">Mint, redeem, and manage your Gdogarmy NFTs.</p>
+            <p class="text-xl md:text-2xl text-light-gray max-w-3xl mx-auto mb-10">Mint and redeem your Gdogarmy NFTs.</p>
             <div class="bg-dark/50 p-6 rounded-lg border border-primary/30 max-w-md mx-auto mb-8">
                 <div class="flex flex-col space-y-4">
                     <button id="connectWalletButton" class="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all">Connect Wallet</button>
@@ -483,25 +483,13 @@
                 return false;
             }
             const byteLength = new TextEncoder().encode(name).length;
-            if (byteLength > 15) {
-                document.getElementById('nameStatus').innerText = 'Name too long (max 15 bytes)';
+            if (byteLength > 15 || byteLength === 0) {
+                document.getElementById('nameStatus').innerText = 'Name must be 1-15 bytes';
                 document.getElementById('nameStatus').className = 'text-red-500 text-sm mt-1';
                 return false;
             }
             try {
-                let tokenId;
-                let attempts = 0;
-                const maxAttempts = 3;
-                while (attempts < maxAttempts) {
-                    try {
-                        tokenId = await nftContract.methods.getTokenIdById(name.toLowerCase()).call();
-                        break;
-                    } catch (error) {
-                        attempts++;
-                        if (attempts === maxAttempts) throw error;
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                    }
-                }
+                const tokenId = await nftContract.methods.getTokenIdById(name.toLowerCase()).call();
                 const owner = tokenId != 0 ? await nftContract.methods.ownerOf(tokenId).call() : '0x0000000000000000000000000000000000000000';
                 if (tokenId != 0 && owner.toLowerCase() !== NFT_ADDRESS.toLowerCase()) {
                     document.getElementById('nameStatus').innerText = 'Name already minted';
@@ -518,7 +506,7 @@
                     document.getElementById('nameStatus').className = 'text-secondary text-sm mt-1';
                     return true;
                 }
-                document.getElementById('nameStatus').innerText = 'Error checking name availability';
+                document.getElementById('nameStatus').innerText = 'Error checking name';
                 document.getElementById('nameStatus').className = 'text-red-500 text-sm mt-1';
                 return false;
             }
@@ -566,7 +554,7 @@
             clearTimeout(debounceTimeout);
             debounceTimeout = setTimeout(async () => {
                 const isNameAvailable = await checkNameAvailability(mintName);
-                document.getElementById('mintButton').disabled = !mintName || new TextEncoder().encode(mintName).length > 15 || !isNameAvailable;
+                document.getElementById('mintButton').disabled = !mintName || !isNameAvailable;
                 document.getElementById('redeemButton').disabled = !tokenId || isNaN(tokenId);
             }, 300);
         }
