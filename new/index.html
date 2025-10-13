@@ -483,13 +483,25 @@
                 return false;
             }
             const byteLength = new TextEncoder().encode(name).length;
-            if (byteLength > 15 || byteLength === 0) {
-                document.getElementById('nameStatus').innerText = 'Name must be 1-15 bytes';
+            if (byteLength > 15) {
+                document.getElementById('nameStatus').innerText = 'Name too long (max 15 bytes)';
                 document.getElementById('nameStatus').className = 'text-red-500 text-sm mt-1';
                 return false;
             }
             try {
-                const tokenId = await nftContract.methods.getTokenIdById(name.toLowerCase()).call();
+                let tokenId;
+                let attempts = 0;
+                const maxAttempts = 3;
+                while (attempts < maxAttempts) {
+                    try {
+                        tokenId = await nftContract.methods.getTokenIdById(name.toLowerCase()).call();
+                        break;
+                    } catch (error) {
+                        attempts++;
+                        if (attempts === maxAttempts) throw error;
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
                 const owner = tokenId != 0 ? await nftContract.methods.ownerOf(tokenId).call() : '0x0000000000000000000000000000000000000000';
                 if (tokenId != 0 && owner.toLowerCase() !== NFT_ADDRESS.toLowerCase()) {
                     document.getElementById('nameStatus').innerText = 'Name already minted';
@@ -506,7 +518,7 @@
                     document.getElementById('nameStatus').className = 'text-secondary text-sm mt-1';
                     return true;
                 }
-                document.getElementById('nameStatus').innerText = 'Error checking name';
+                document.getElementById('nameStatus').innerText = 'Error checking name availability';
                 document.getElementById('nameStatus').className = 'text-red-500 text-sm mt-1';
                 return false;
             }
@@ -554,7 +566,7 @@
             clearTimeout(debounceTimeout);
             debounceTimeout = setTimeout(async () => {
                 const isNameAvailable = await checkNameAvailability(mintName);
-                document.getElementById('mintButton').disabled = !mintName || !isNameAvailable;
+                document.getElementById('mintButton').disabled = !mintName || new TextEncoder().encode(mintName).length > 15 || !isNameAvailable;
                 document.getElementById('redeemButton').disabled = !tokenId || isNaN(tokenId);
             }, 300);
         }
