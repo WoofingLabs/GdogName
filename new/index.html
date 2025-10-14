@@ -268,7 +268,7 @@
                     status.innerText = 'Insufficient GT for gas fees';
                     return false;
                 }
-                const tx = await gdogContract.methods.approve(NFT_ADDRESS, MAX_APPROAL).send({
+                const tx = await gdogContract.methods.approve(NFT_ADDRESS, MAX_APPROVAL).send({
                     from: account,
                     gas: web3.utils.toHex(Math.min(estimatedGas * 2, 1000000))
                 });
@@ -336,6 +336,7 @@
                 status.innerText = `NFT "${mintName}.gdog" minted successfully!`;
                 document.getElementById('mintName').value = '';
                 document.getElementById('nameStatus').innerText = '';
+                await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for blockchain sync
                 await checkBalances();
             } catch (error) {
                 status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Mint failed: ${error.message}`;
@@ -393,6 +394,7 @@
 
                 status.innerText = 'NFT redeemed successfully!';
                 document.getElementById('tokenId').value = '';
+                await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for blockchain sync
                 await checkBalances();
             } catch (error) {
                 status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Redeem failed: ${error.message}`;
@@ -455,6 +457,7 @@
 
                 status.innerText = 'Batch redeem successful!';
                 document.getElementById('tokenId').value = '';
+                await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for blockchain sync
                 await checkBalances();
             } catch (error) {
                 status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Batch redeem failed: ${error.message}`;
@@ -483,6 +486,7 @@
             try {
                 const isValid = await nftContract.methods.isTokenValid(tokenId).call();
                 if (!isValid) {
+                    console.log(`Token ${tokenId} is invalid`);
                     return 'https://www.gdoggate.com/nft/default.jpg';
                 }
                 const tokenURI = await nftContract.methods.tokenURI(tokenId).call();
@@ -490,6 +494,7 @@
                     const base64Data = tokenURI.split('data:application/json;base64,')[1];
                     const decodedJson = decodeURIComponent(escape(atob(base64Data)));
                     const json = JSON.parse(decodedJson);
+                    console.log(`Token ${tokenId} URI parsed:`, json);
                     return json.image || 'https://www.gdoggate.com/nft/default.jpg';
                 } catch (decodeError) {
                     console.error(`Error decoding tokenURI for token ${tokenId}:`, decodeError);
@@ -556,22 +561,43 @@
             if (!web3 || !account || nftBalance == 0) {
                 nftList.innerHTML = '<li>No NFTs</li>';
                 document.getElementById('batchRedeemButton').disabled = true;
+                console.log('No NFTs or wallet not connected');
                 return;
             }
             try {
                 let validNFTCount = 0;
+                console.log(`Fetching ${nftBalance} NFTs for account ${account}`);
                 for (let i = 0; i < nftBalance; i++) {
-                    const tokenId = await nftContract.methods.tokenOfOwnerByIndex(account, i).call();
-                    const isValid = await nftContract.methods.isTokenValid(tokenId).call();
-                    if (!isValid) continue;
+                    let tokenId;
+                    try {
+                        tokenId = await nftContract.methods.tokenOfOwnerByIndex(account, i).call();
+                        console.log(`Token ${i}: ID ${tokenId}`);
+                    } catch (error) {
+                        console.error(`Error fetching tokenOfOwnerByIndex for index ${i}:`, error);
+                        continue;
+                    }
+                    let isValid;
+                    try {
+                        isValid = await nftContract.methods.isTokenValid(tokenId).call();
+                        console.log(`Token ${tokenId} isValid: ${isValid}`);
+                    } catch (error) {
+                        console.error(`Error checking isTokenValid for token ${tokenId}:`, error);
+                        continue;
+                    }
+                    if (!isValid) {
+                        console.log(`Skipping invalid token ${tokenId}`);
+                        continue;
+                    }
                     let tokenName;
                     try {
                         tokenName = decodeURIComponent(escape(await nftContract.methods.tokenName(tokenId).call()));
+                        console.log(`Token ${tokenId} name: ${tokenName}`);
                     } catch (error) {
                         tokenName = `Token ID ${tokenId} (Name Unavailable)`;
                         console.error(`Error decoding tokenName for token ${tokenId}:`, error);
                     }
                     const imageUrl = await getNFTImage(tokenId);
+                    console.log(`Token ${tokenId} image URL: ${imageUrl}`);
                     const li = document.createElement('li');
                     li.className = 'flex items-center py-2';
                     li.innerHTML = `
@@ -583,7 +609,9 @@
                     validNFTCount++;
                 }
                 document.getElementById('batchRedeemButton').disabled = validNFTCount === 0;
+                console.log(`Total valid NFTs displayed: ${validNFTCount}`);
             } catch (error) {
+                console.error('Error updating NFT list:', error);
                 nftList.innerHTML = `<li>Query NFTs failed: ${error.message}</li>`;
                 document.getElementById('batchRedeemButton').disabled = true;
             }
