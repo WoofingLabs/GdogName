@@ -268,7 +268,7 @@
                     status.innerText = 'Insufficient GT for gas fees';
                     return false;
                 }
-                const tx = await gdogContract.methods.approve(NFT_ADDRESS, MAX_APPROVAL).send({
+                const tx = await gdogContract.methods.approve(NFT_ADDRESS, MAX_APPROAL).send({
                     from: account,
                     gas: web3.utils.toHex(Math.min(estimatedGas * 2, 1000000))
                 });
@@ -486,9 +486,17 @@
                     return 'https://www.gdoggate.com/nft/default.jpg';
                 }
                 const tokenURI = await nftContract.methods.tokenURI(tokenId).call();
-                const json = JSON.parse(atob(tokenURI.split('data:application/json;base64,')[1]));
-                return json.image || 'https://www.gdoggate.com/nft/default.jpg';
+                try {
+                    const base64Data = tokenURI.split('data:application/json;base64,')[1];
+                    const decodedJson = decodeURIComponent(escape(atob(base64Data)));
+                    const json = JSON.parse(decodedJson);
+                    return json.image || 'https://www.gdoggate.com/nft/default.jpg';
+                } catch (decodeError) {
+                    console.error(`Error decoding tokenURI for token ${tokenId}:`, decodeError);
+                    return 'https://www.gdoggate.com/nft/default.jpg';
+                }
             } catch (error) {
+                console.error(`Error fetching tokenURI for token ${tokenId}:`, error);
                 return 'https://www.gdoggate.com/nft/default.jpg';
             }
         }
@@ -556,13 +564,19 @@
                     const tokenId = await nftContract.methods.tokenOfOwnerByIndex(account, i).call();
                     const isValid = await nftContract.methods.isTokenValid(tokenId).call();
                     if (!isValid) continue;
-                    const tokenName = await nftContract.methods.tokenName(tokenId).call();
+                    let tokenName;
+                    try {
+                        tokenName = decodeURIComponent(escape(await nftContract.methods.tokenName(tokenId).call()));
+                    } catch (error) {
+                        tokenName = `Token ID ${tokenId} (Name Unavailable)`;
+                        console.error(`Error decoding tokenName for token ${tokenId}:`, error);
+                    }
                     const imageUrl = await getNFTImage(tokenId);
                     const li = document.createElement('li');
                     li.className = 'flex items-center py-2';
                     li.innerHTML = `
                         <input type="checkbox" class="nft-checkbox mr-2" value="${tokenId}">
-                        <img src="${imageUrl}" alt="NFT ${tokenName}" class="w-10 h-10 rounded mr-2 cursor-pointer" onclick="window.open('${imageUrl}', '_blank')">
+                        <img src="${imageUrl}" alt="NFT ${tokenName}" class="w-10 h-10 rounded mr-2 cursor-pointer" onerror="this.src='https://www.gdoggate.com/nft/default.jpg'" onclick="window.open('${imageUrl}', '_blank')">
                         <span>${tokenName} (ID: ${tokenId})</span>
                     `;
                     nftList.appendChild(li);
