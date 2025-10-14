@@ -23,7 +23,8 @@
                         display: ['Changa One', 'system-ui', 'sans-serif']
                     },
                     animation: {
-                        'float': 'float 3s ease-in-out infinite'
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-glow': 'pulse 4s ease-in-out infinite'
                     },
                     keyframes: {
                         float: {
@@ -37,8 +38,12 @@
     </script>
     <style type="text/tailwindcss">
         @layer utilities {
-            .text-shadow-glow { text-shadow: 0 0 10px rgba(0, 104, 255, 0.5); }
-            .glow-border { box-shadow: 0 0 12px rgba(24, 229, 160, 0.3); }
+            .text-shadow-glow {
+                text-shadow: 0 0 10px rgba(0, 104, 255, 0.5);
+            }
+            .glow-border {
+                box-shadow: 0 0 12px rgba(24, 229, 160, 0.3);
+            }
             .bg-grid {
                 background-image: url('data:image/svg+xml,%3Csvg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"%3E%3Ccircle cx="1" cy="1" r="1" fill="%230068FF" fill-opacity="0.1"/%3E%3C/svg%3E');
                 background-size: 20px 20px;
@@ -76,14 +81,16 @@
                 <img src="https://woofinglabs.github.io/GdogToTheMoon/images/gdog_logo.png" alt="GDOG Logo" class="w-full h-full object-cover rounded-full border-4 border-secondary/50 glow-border">
             </div>
             <h1 class="font-display text-5xl md:text-7xl mb-6 text-primary text-shadow-glow">Gdogarmy NFT Operations</h1>
-            <p class="text-xl md:text-2xl text-light-gray max-w-3xl mx-auto mb-10">Mint and redeem your Gdogarmy NFTs.</p>
+            <p class="text-xl md:text-2xl text-light-gray max-w-3xl mx-auto mb-10">
+                Mint, redeem, and manage your Gdogarmy NFTs.
+            </p>
             <div class="bg-dark/50 p-6 rounded-lg border border-primary/30 max-w-md mx-auto mb-8">
                 <div class="flex flex-col space-y-4">
                     <button id="connectWalletButton" class="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all">Connect Wallet</button>
                     <p id="networkStatus" class="text-light-gray text-sm">Click to connect wallet...</p>
                     <div class="flex items-center bg-dark/80 p-3 rounded-lg border border-primary/20">
                         <i class="fa fa-link text-accent mr-3"></i>
-                        <span class="font-mono text-sm text-white truncate">0xC55FE822B6a3af12b317D68F0DA49B57E6bE58E2</span>
+                        <span class="font-mono text-sm text-white truncate">0x2B5fdB39EB6aE2406007614B8050F3f914eE3CeA</span>
                         <button class="ml-3 text-light-gray hover:text-secondary transition-colors" onclick="copyContract()">
                             <i class="fa fa-copy"></i>
                         </button>
@@ -91,24 +98,17 @@
                     <p id="balanceStatus" class="text-light-gray text-sm">GT Balance: 0 | GDOG Balance: 0 | NFTs Owned: 0</p>
                     <div>
                         <label class="block text-left text-light-gray mb-2">Mint NFT Name</label>
-                        <input type="text" id="mintName" placeholder="Enter name (e.g., test, 0, 😊, 中文)" class="w-full px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
+                        <input type="text" id="mintName" placeholder="Enter name (e.g., coolname, 😊, 中文)" class="w-full px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
                         <p id="nameStatus" class="text-light-gray text-sm mt-1"></p>
                     </div>
                     <div>
                         <label class="block text-left text-light-gray mb-2">Redeem NFT Token ID</label>
                         <input type="text" id="tokenId" placeholder="Enter Token ID" class="w-full px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
                     </div>
-                    <div>
-                        <label class="block text-left text-light-gray mb-2">Check NFT by Token ID</label>
-                        <input type="text" id="checkTokenId" placeholder="Enter Token ID to verify" class="w-full px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
-                        <button id="checkTokenButton" class="mt-2 px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all disabled:bg-dark/50 disabled:cursor-not-allowed" disabled>Check NFT</button>
-                    </div>
                     <div class="flex flex-col space-y-2">
                         <button class="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all disabled:bg-dark/50 disabled:cursor-not-allowed" id="mintButton" disabled>Mint NFT</button>
                         <button class="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all disabled:bg-dark/50 disabled:cursor-not-allowed" id="redeemButton" disabled>Redeem NFT</button>
                         <button class="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all disabled:bg-dark/50 disabled:cursor-not-allowed" id="batchRedeemButton" disabled>Batch Redeem Selected NFTs</button>
-                        <button class="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all" id="refreshButton">Refresh NFTs</button>
-                        <button class="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all" id="clearCacheButton">Clear Cache</button>
                     </div>
                     <div class="bg-dark/80 p-4 rounded-lg border border-primary/20">
                         <h3 class="text-lg font-medium mb-2">My Gdogarmy NFTs</h3>
@@ -131,7 +131,7 @@
     <script src="https://cdn.jsdelivr.net/npm/web3@1.7.0/dist/web3.min.js"></script>
     <script>
         const GDOG = '0xf6D9Cf57e20bA0d33372E8998A9424aa53411E04';
-        const NFT_ADDRESS = '0xC55FE822B6a3af12b317D68F0DA49B57E6bE58E2';
+        const NFT_ADDRESS = '0x2B5fdB39EB6aE2406007614B8050F3f914eE3CeA';
         const MINT_FEE = '100000000000000000000000';
         const MAX_APPROVAL = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
@@ -142,16 +142,15 @@
         ];
 
         const nftAbi = [
-            {"inputs":[{"internalType":"string","name":"_id","type":"string"},{"internalType":"string","name":"_imageFormat","type":"string"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"string","name":"_id","type":"string"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function"},
             {"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"release","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"string","name":"_newId","type":"string"},{"internalType":"string","name":"_imageFormat","type":"string"}],"name":"updateId","outputs":[],"stateMutability":"nonpayable","type":"function"},
             {"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
             {"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
             {"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenOfOwnerByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
             {"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenName","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
             {"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
             {"inputs":[{"internalType":"string","name":"_id","type":"string"}],"name":"getTokenIdById","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-            {"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"isTokenValid","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"}
+            {"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getIdByTokenId","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"}
         ];
 
         const chains = {
@@ -196,6 +195,7 @@
                     document.getElementById('networkStatus').innerText = 'Connected to Gate Layer (ID: 10088)';
                 } catch (error) {
                     document.getElementById('networkStatus').innerText = 'Wallet connection failed: ' + (error.message || 'Unknown error');
+                    console.error('Connection error:', error);
                 }
             } else {
                 document.getElementById('networkStatus').innerText = 'Please install MetaMask';
@@ -232,48 +232,20 @@
             nftContract = new web3.eth.Contract(nftAbi, NFT_ADDRESS);
         }
 
-        async function clearCache() {
-            const status = document.getElementById('networkStatus');
-            try {
-                status.innerText = 'Clearing cache...';
-                await window.ethereum.request({ method: 'wallet_requestPermissions', params: [{ eth_accounts: {} }] });
-                await switchNetwork('GateLayer');
-                localStorage.clear();
-                await checkBalances();
-                status.innerText = 'Cache cleared, NFTs refreshed!';
-            } catch (error) {
-                status.innerText = `Cache clear failed: ${error.message}`;
-            }
-        }
-
         async function checkBalances() {
             if (!web3 || !account) {
                 document.getElementById('mintButton').disabled = true;
                 document.getElementById('redeemButton').disabled = true;
                 document.getElementById('batchRedeemButton').disabled = true;
-                document.getElementById('checkTokenButton').disabled = true;
                 document.getElementById('balanceStatus').innerText = 'GT Balance: 0 | GDOG Balance: 0 | NFTs Owned: 0';
                 document.getElementById('nftList').innerHTML = '<li>Wallet not connected</li>';
                 document.getElementById('nameStatus').innerText = '';
                 return;
             }
             try {
-                document.getElementById('balanceStatus').innerText = 'Fetching balances...';
                 const gtBalance = await web3.eth.getBalance(account);
                 const gdogBalance = await gdogContract.methods.balanceOf(account).call();
-                let nftBalance;
-                const maxAttempts = 5;
-                for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-                    try {
-                        nftBalance = await nftContract.methods.balanceOf(account).call();
-                        console.log(`Attempt ${attempt}: NFT Balance: ${nftBalance}`);
-                        break;
-                    } catch (error) {
-                        console.error(`Attempt ${attempt}: Error fetching balanceOf:`, error);
-                        if (attempt === maxAttempts) throw new Error(`Failed to fetch balanceOf: ${error.message}`);
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                    }
-                }
+                const nftBalance = await nftContract.methods.balanceOf(account).call();
                 const gtBalanceFormatted = Number(web3.utils.fromWei(gtBalance, 'ether')).toFixed(4);
                 const gdogBalanceFormatted = Number(web3.utils.fromWei(gdogBalance, 'ether')).toFixed(4);
                 document.getElementById('balanceStatus').innerText = `GT Balance: ${gtBalanceFormatted} | GDOG Balance: ${gdogBalanceFormatted} | NFTs Owned: ${nftBalance}`;
@@ -283,10 +255,10 @@
                 document.getElementById('mintButton').disabled = true;
                 document.getElementById('redeemButton').disabled = true;
                 document.getElementById('batchRedeemButton').disabled = true;
-                document.getElementById('checkTokenButton').disabled = true;
-                document.getElementById('balanceStatus').innerText = `Query failed: ${error.message}`;
+                document.getElementById('balanceStatus').innerText = 'Query failed';
                 document.getElementById('nftList').innerHTML = `<li>Query failed: ${error.message}</li>`;
                 document.getElementById('nameStatus').innerText = '';
+                console.error('Balance check error:', error);
             }
         }
 
@@ -323,7 +295,6 @@
             const status = document.getElementById('networkStatus');
             const mintButton = document.getElementById('mintButton');
             const mintName = document.getElementById('mintName').value.trim();
-            const imageFormat = 'jpg';
 
             if (!web3 || !account) {
                 status.innerText = 'Please connect wallet';
@@ -355,7 +326,7 @@
                 status.innerText = 'Minting NFT...';
 
                 const gasPrice = await web3.eth.getGasPrice();
-                const estimatedGas = await nftContract.methods.mint(mintName, imageFormat).estimateGas({ from: account });
+                const estimatedGas = await nftContract.methods.mint(mintName).estimateGas({ from: account });
                 const nativeBalance = await web3.eth.getBalance(account);
                 const gasCost = web3.utils.toBN(gasPrice).mul(web3.utils.toBN(estimatedGas));
                 if (web3.utils.toBN(nativeBalance).lt(gasCost)) {
@@ -363,7 +334,7 @@
                     return;
                 }
 
-                const tx = await nftContract.methods.mint(mintName, imageFormat).send({
+                const tx = await nftContract.methods.mint(mintName).send({
                     from: account,
                     gas: web3.utils.toHex(Math.min(estimatedGas * 2, 3000000))
                 });
@@ -375,6 +346,7 @@
                 await checkBalances();
             } catch (error) {
                 status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Mint failed: ${error.message}`;
+                console.error('Mint error:', error);
             } finally {
                 mintButton.disabled = false;
                 mintButton.innerHTML = 'Mint NFT';
@@ -399,12 +371,6 @@
                 redeemButton.disabled = true;
                 redeemButton.innerHTML = 'Redeeming... <i class="fa fa-spinner fa-spin ml-2"></i>';
                 status.innerText = 'Checking Token ID and gas...';
-
-                const isValid = await nftContract.methods.isTokenValid(tokenId).call();
-                if (!isValid) {
-                    status.innerText = 'This NFT is invalid or has been redeemed';
-                    return;
-                }
 
                 const owner = await nftContract.methods.ownerOf(tokenId).call();
                 if (owner.toLowerCase() !== account.toLowerCase()) {
@@ -432,6 +398,7 @@
                 await checkBalances();
             } catch (error) {
                 status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Redeem failed: ${error.message}`;
+                console.error('Redeem error:', error);
             } finally {
                 redeemButton.disabled = false;
                 redeemButton.innerHTML = 'Redeem NFT';
@@ -462,12 +429,6 @@
 
                 for (const checkbox of checkboxes) {
                     const tokenId = checkbox.value;
-                    const isValid = await nftContract.methods.isTokenValid(tokenId).call();
-                    if (!isValid) {
-                        status.innerText = `Token ID ${tokenId} is invalid or has been redeemed`;
-                        return;
-                    }
-
                     const owner = await nftContract.methods.ownerOf(tokenId).call();
                     if (owner.toLowerCase() !== account.toLowerCase()) {
                         status.innerText = `Token ID ${tokenId} is not your NFT`;
@@ -494,93 +455,38 @@
                 await checkBalances();
             } catch (error) {
                 status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Batch redeem failed: ${error.message}`;
+                console.error('Batch redeem error:', error);
             } finally {
                 batchRedeemButton.disabled = false;
                 batchRedeemButton.innerHTML = 'Batch Redeem Selected NFTs';
             }
         }
 
-        async function checkToken() {
-            const status = document.getElementById('networkStatus');
-            const checkTokenButton = document.getElementById('checkTokenButton');
-            const tokenId = document.getElementById('checkTokenId').value.trim();
-
-            if (!web3 || !account) {
-                status.innerText = 'Please connect wallet';
-                return;
-            }
-            if (!tokenId || isNaN(tokenId)) {
-                status.innerText = 'Enter valid Token ID';
-                return;
-            }
-
-            try {
-                checkTokenButton.disabled = true;
-                checkTokenButton.innerHTML = 'Checking... <i class="fa fa-spinner fa-spin ml-2"></i>';
-                status.innerText = `Checking Token ID ${tokenId}...`;
-
-                const isValid = await nftContract.methods.isTokenValid(tokenId).call();
-                if (!isValid) {
-                    status.innerText = `Token ID ${tokenId} is invalid or has been redeemed`;
-                    return;
-                }
-
-                const owner = await nftContract.methods.ownerOf(tokenId).call();
-                if (owner.toLowerCase() !== account.toLowerCase()) {
-                    status.innerText = `Token ID ${tokenId} is not owned by you`;
-                    return;
-                }
-
-                let tokenName;
-                try {
-                    tokenName = decodeURIComponent(escape(await nftContract.methods.tokenName(tokenId).call()));
-                } catch (error) {
-                    tokenName = `Token ID ${tokenId} (Name Unavailable)`;
-                    console.error(`Error decoding tokenName for token ${tokenId}:`, error);
-                }
-
-                const imageUrl = await getNFTImage(tokenId);
-                const nftList = document.getElementById('nftList');
-                const li = document.createElement('li');
-                li.className = 'flex items-center py-2';
-                li.innerHTML = `
-                    <input type="checkbox" class="nft-checkbox mr-2" value="${tokenId}">
-                    <img src="${imageUrl}" alt="NFT ${tokenName}" class="w-10 h-10 rounded mr-2 cursor-pointer" onerror="this.src='https://www.gdoggate.com/nft/default.jpg'" onclick="window.open('${imageUrl}', '_blank')">
-                    <span>${tokenName} (ID: ${tokenId})</span>
-                `;
-                nftList.appendChild(li);
-                status.innerText = `Token ID ${tokenId} added to list`;
-                document.getElementById('checkTokenId').value = '';
-                document.getElementById('batchRedeemButton').disabled = false;
-            } catch (error) {
-                status.innerText = `Check failed: ${error.message}`;
-            } finally {
-                checkTokenButton.disabled = false;
-                checkTokenButton.innerHTML = 'Check NFT';
-            }
+        function copyContract() {
+            const contract = NFT_ADDRESS;
+            navigator.clipboard.writeText(contract).then(() => {
+                const notification = document.createElement('div');
+                notification.className = 'fixed bottom-4 right-4 bg-primary text-white px-4 py-2 rounded-lg shadow-lg z-50';
+                notification.textContent = 'Contract address copied!';
+                document.body.appendChild(notification);
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transition = 'opacity 0.3s';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 2000);
+            });
         }
 
         async function getNFTImage(tokenId) {
             try {
-                const isValid = await nftContract.methods.isTokenValid(tokenId).call();
-                if (!isValid) {
-                    console.log(`Token ${tokenId} is invalid`);
-                    return 'https://www.gdoggate.com/nft/default.jpg';
-                }
                 const tokenURI = await nftContract.methods.tokenURI(tokenId).call();
-                try {
-                    const base64Data = tokenURI.split('data:application/json;base64,')[1];
-                    const decodedJson = decodeURIComponent(escape(atob(base64Data)));
-                    const json = JSON.parse(decodedJson);
-                    console.log(`Token ${tokenId} URI parsed:`, json);
-                    return json.image || 'https://www.gdoggate.com/nft/default.jpg';
-                } catch (decodeError) {
-                    console.error(`Error decoding tokenURI for token ${tokenId}:`, decodeError);
-                    return 'https://www.gdoggate.com/nft/default.jpg';
-                }
+                const json = JSON.parse(atob(tokenURI.split('data:application/json;base64,')[1]));
+                return json.image;
             } catch (error) {
-                console.error(`Error fetching tokenURI for token ${tokenId}:`, error);
-                return 'https://www.gdoggate.com/nft/default.jpg';
+                console.error(`Failed to fetch tokenURI for token ${tokenId}:`, error);
+                return 'https://gdoggate.com/nft/' + tokenId + '.jpg';
             }
         }
 
@@ -599,7 +505,7 @@
             try {
                 let tokenId;
                 let attempts = 0;
-                const maxAttempts = 5;
+                const maxAttempts = 3;
                 while (attempts < maxAttempts) {
                     try {
                         tokenId = await nftContract.methods.getTokenIdById(name.toLowerCase()).call();
@@ -610,9 +516,7 @@
                         await new Promise(resolve => setTimeout(resolve, 1000));
                     }
                 }
-                const isValid = tokenId != 0 ? await nftContract.methods.isTokenValid(tokenId).call() : false;
-                const owner = tokenId != 0 ? await nftContract.methods.ownerOf(tokenId).call() : '0x0000000000000000000000000000000000000000';
-                if (tokenId != 0 && isValid && owner.toLowerCase() !== NFT_ADDRESS.toLowerCase()) {
+                if (tokenId != 0) {
                     document.getElementById('nameStatus').innerText = 'Name already minted';
                     document.getElementById('nameStatus').className = 'text-red-500 text-sm mt-1';
                     return false;
@@ -622,92 +526,48 @@
                     return true;
                 }
             } catch (error) {
-                if (error.message.includes('revert') || error.message.includes('ID not minted') || error.message.includes('Token is invalid')) {
+                let errorMessage = 'Error checking name availability';
+                if (error.message.includes('network')) {
+                    errorMessage = 'Network error, please check your connection';
+                } else if (error.message.includes('revert') || error.message.includes('ID not minted')) {
                     document.getElementById('nameStatus').innerText = 'Name available';
                     document.getElementById('nameStatus').className = 'text-secondary text-sm mt-1';
                     return true;
                 }
-                document.getElementById('nameStatus').innerText = 'Error checking name availability';
+                document.getElementById('nameStatus').innerText = errorMessage;
                 document.getElementById('nameStatus').className = 'text-red-500 text-sm mt-1';
+                console.error('Name check error:', error);
                 return false;
             }
         }
 
         async function updateNFTList(nftBalance) {
             const nftList = document.getElementById('nftList');
-            nftList.innerHTML = '<li>Loading NFTs... <i class="fa fa-spinner fa-spin ml-2"></i></li>';
+            nftList.innerHTML = '';
             if (!web3 || !account || nftBalance == 0) {
-                nftList.innerHTML = '<li>No NFTs found. Try checking specific Token IDs.</li>';
+                nftList.innerHTML = '<li>No NFTs</li>';
                 document.getElementById('batchRedeemButton').disabled = true;
-                console.log('No NFTs or wallet not connected');
                 return;
             }
             try {
-                let validNFTCount = 0;
-                console.log(`Fetching ${nftBalance} NFTs for account ${account}`);
                 for (let i = 0; i < nftBalance; i++) {
-                    let tokenId;
-                    let attempt = 0;
-                    const maxAttempts = 5;
-                    while (attempt < maxAttempts) {
-                        try {
-                            tokenId = await nftContract.methods.tokenOfOwnerByIndex(account, i).call();
-                            console.log(`Attempt ${attempt + 1}: Token ${i}: ID ${tokenId}`);
-                            break;
-                        } catch (error) {
-                            console.error(`Attempt ${attempt + 1}: Error fetching tokenOfOwnerByIndex for index ${i}:`, error);
-                            attempt++;
-                            if (attempt === maxAttempts) {
-                                console.error(`Failed to fetch tokenOfOwnerByIndex for index ${i}`);
-                                continue;
-                            }
-                            await new Promise(resolve => setTimeout(resolve, 1000));
-                        }
-                    }
-                    if (!tokenId) continue;
-                    let isValid;
-                    try {
-                        isValid = await nftContract.methods.isTokenValid(tokenId).call();
-                        console.log(`Token ${tokenId} isValid: ${isValid}`);
-                    } catch (error) {
-                        console.error(`Error checking isTokenValid for token ${tokenId}:`, error);
-                        continue;
-                    }
-                    if (!isValid) {
-                        console.log(`Skipping invalid token ${tokenId}`);
-                        continue;
-                    }
-                    let tokenName;
-                    try {
-                        tokenName = decodeURIComponent(escape(await nftContract.methods.tokenName(tokenId).call()));
-                        console.log(`Token ${tokenId} name: ${tokenName}`);
-                    } catch (error) {
-                        tokenName = `Token ID ${tokenId} (Name Unavailable)`;
-                        console.error(`Error decoding tokenName for token ${tokenId}:`, error);
-                    }
+                    const tokenId = await nftContract.methods.tokenOfOwnerByIndex(account, i).call();
+                    const tokenName = await nftContract.methods.tokenName(tokenId).call();
                     const imageUrl = await getNFTImage(tokenId);
-                    console.log(`Token ${tokenId} image URL: ${imageUrl}`);
                     const li = document.createElement('li');
                     li.className = 'flex items-center py-2';
                     li.innerHTML = `
                         <input type="checkbox" class="nft-checkbox mr-2" value="${tokenId}">
-                        <img src="${imageUrl}" alt="NFT ${tokenName}" class="w-10 h-10 rounded mr-2 cursor-pointer" onerror="this.src='https://www.gdoggate.com/nft/default.jpg'" onclick="window.open('${imageUrl}', '_blank')">
+                        <img src="${imageUrl}" alt="NFT ${tokenName}" class="w-10 h-10 rounded mr-2 cursor-pointer" onclick="window.open('${imageUrl}', '_blank')">
                         <span>${tokenName} (ID: ${tokenId})</span>
                     `;
                     nftList.appendChild(li);
-                    validNFTCount++;
                 }
-                document.getElementById('batchRedeemButton').disabled = validNFTCount == 0;
-                console.log(`Total valid NFTs displayed: ${validNFTCount}`);
-                if (validNFTCount == 0 && nftBalance > 0) {
-                    nftList.innerHTML = '<li>No valid NFTs found. Try checking specific Token IDs or clearing cache.</li>';
-                } else if (validNFTCount == 0) {
-                    nftList.innerHTML = '<li>No NFTs found. Try checking specific Token IDs or clearing cache.</li>';
-                }
+                document.getElementById('batchRedeemButton').disabled = false;
             } catch (error) {
-                console.error('Error updating NFT list:', error);
-                nftList.innerHTML = `<li>Query NFTs failed: ${error.message}. Try checking specific Token IDs or clearing cache.</li>`;
+                nftList.innerHTML = `<li>Query NFTs failed: ${error.message}</li>`;
                 document.getElementById('batchRedeemButton').disabled = true;
+                console.error('NFT list error:', error);
             }
         }
 
@@ -716,35 +576,17 @@
                 document.getElementById('mintButton').disabled = true;
                 document.getElementById('redeemButton').disabled = true;
                 document.getElementById('batchRedeemButton').disabled = true;
-                document.getElementById('checkTokenButton').disabled = true;
                 document.getElementById('nameStatus').innerText = '';
                 return;
             }
             const mintName = document.getElementById('mintName').value.trim();
             const tokenId = document.getElementById('tokenId').value.trim();
-            const checkTokenId = document.getElementById('checkTokenId').value.trim();
             clearTimeout(debounceTimeout);
             debounceTimeout = setTimeout(async () => {
                 const isNameAvailable = await checkNameAvailability(mintName);
                 document.getElementById('mintButton').disabled = !mintName || new TextEncoder().encode(mintName).length > 15 || !isNameAvailable;
-                document.getElementById('redeemButton').disabled = !tokenId || isNaN(tokenId);
-                document.getElementById('checkTokenButton').disabled = !checkTokenId || isNaN(checkTokenId);
             }, 300);
-        }
-
-        function copyContract() {
-            const contract = NFT_ADDRESS;
-            navigator.clipboard.writeText(contract).then(() => {
-                const notification = document.createElement('div');
-                notification.className = 'fixed bottom-4 right-4 bg-primary text-white px-4 py-2 rounded-lg shadow-lg z-50';
-                notification.textContent = 'Contract address copied!';
-                document.body.appendChild(notification);
-                setTimeout(() => {
-                    notification.style.opacity = '0';
-                    notification.style.transition = 'opacity 0.3s';
-                    setTimeout(() => document.body.removeChild(notification), 300);
-                }, 2000);
-            });
+            document.getElementById('redeemButton').disabled = !tokenId || isNaN(tokenId);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -752,18 +594,16 @@
             document.getElementById('mintButton').addEventListener('click', mintNFT);
             document.getElementById('redeemButton').addEventListener('click', redeemNFT);
             document.getElementById('batchRedeemButton').addEventListener('click', batchRedeemNFT);
-            document.getElementById('checkTokenButton').addEventListener('click', checkToken);
-            document.getElementById('refreshButton').addEventListener('click', checkBalances);
-            document.getElementById('clearCacheButton').addEventListener('click', clearCache);
             document.getElementById('mintName').addEventListener('input', checkButtonStatus);
             document.getElementById('tokenId').addEventListener('input', checkButtonStatus);
-            document.getElementById('checkTokenId').addEventListener('input', checkButtonStatus);
 
             const menuToggle = document.getElementById('menuToggle');
             const mobileMenu = document.getElementById('mobileMenu');
             menuToggle.addEventListener('click', () => {
                 mobileMenu.classList.toggle('hidden');
-                menuToggle.innerHTML = mobileMenu.classList.contains('hidden') ? '<i class="fa fa-bars"></i>' : '<i class="fa fa-times"></i>';
+                menuToggle.innerHTML = mobileMenu.classList.contains('hidden')
+                    ? '<i class="fa fa-bars"></i>'
+                    : '<i class="fa fa-times"></i>';
             });
 
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -771,7 +611,9 @@
                     e.preventDefault();
                     mobileMenu.classList.add('hidden');
                     menuToggle.innerHTML = '<i class="fa fa-bars"></i>';
-                    document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
                 });
             });
 
