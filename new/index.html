@@ -83,7 +83,7 @@
                     <p id="networkStatus" class="text-light-gray text-sm">Click to connect wallet...</p>
                     <div class="flex items-center bg-dark/80 p-3 rounded-lg border border-primary/20">
                         <i class="fa fa-link text-accent mr-3"></i>
-                        <span class="font-mono text-sm text-white truncate">0xD27948210be3daf8B8FE7F2BBB9Eb85353864Aba</span>
+                        <span class="font-mono text-sm text-white truncate">0x6d90f705C409F1E943101F2eA6849181e39B82fE</span>
                         <button class="ml-3 text-light-gray hover:text-secondary transition-colors" onclick="copyContract()">
                             <i class="fa fa-copy"></i>
                         </button>
@@ -98,10 +98,16 @@
                         <label class="block text-left text-light-gray mb-2">Redeem NFT Token ID</label>
                         <input type="text" id="tokenId" placeholder="Enter Token ID" class="w-full px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
                     </div>
+                    <div>
+                        <label class="block text-left text-light-gray mb-2">Check NFT by Token ID</label>
+                        <input type="text" id="checkTokenId" placeholder="Enter Token ID to verify" class="w-full px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
+                        <button id="checkTokenButton" class="mt-2 px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all disabled:bg-dark/50 disabled:cursor-not-allowed" disabled>Check NFT</button>
+                    </div>
                     <div class="flex flex-col space-y-2">
                         <button class="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all disabled:bg-dark/50 disabled:cursor-not-allowed" id="mintButton" disabled>Mint NFT</button>
                         <button class="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all disabled:bg-dark/50 disabled:cursor-not-allowed" id="redeemButton" disabled>Redeem NFT</button>
                         <button class="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all disabled:bg-dark/50 disabled:cursor-not-allowed" id="batchRedeemButton" disabled>Batch Redeem Selected NFTs</button>
+                        <button class="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all" id="refreshButton">Refresh NFTs</button>
                     </div>
                     <div class="bg-dark/80 p-4 rounded-lg border border-primary/20">
                         <h3 class="text-lg font-medium mb-2">My Gdogarmy NFTs</h3>
@@ -124,7 +130,7 @@
     <script src="https://cdn.jsdelivr.net/npm/web3@1.7.0/dist/web3.min.js"></script>
     <script>
         const GDOG = '0xf6D9Cf57e20bA0d33372E8998A9424aa53411E04';
-        const NFT_ADDRESS = '0xD27948210be3daf8B8FE7F2BBB9Eb85353864Aba';
+        const NFT_ADDRESS = '0xC55FE822B6a3af12b317D68F0DA49B57E6bE58E2';
         const MINT_FEE = '100000000000000000000000';
         const MAX_APPROVAL = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
@@ -230,15 +236,29 @@
                 document.getElementById('mintButton').disabled = true;
                 document.getElementById('redeemButton').disabled = true;
                 document.getElementById('batchRedeemButton').disabled = true;
+                document.getElementById('checkTokenButton').disabled = true;
                 document.getElementById('balanceStatus').innerText = 'GT Balance: 0 | GDOG Balance: 0 | NFTs Owned: 0';
                 document.getElementById('nftList').innerHTML = '<li>Wallet not connected</li>';
                 document.getElementById('nameStatus').innerText = '';
                 return;
             }
             try {
+                document.getElementById('balanceStatus').innerText = 'Fetching balances...';
                 const gtBalance = await web3.eth.getBalance(account);
                 const gdogBalance = await gdogContract.methods.balanceOf(account).call();
-                const nftBalance = await nftContract.methods.balanceOf(account).call();
+                let nftBalance;
+                const maxAttempts = 3;
+                for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                    try {
+                        nftBalance = await nftContract.methods.balanceOf(account).call();
+                        console.log(`Attempt ${attempt}: NFT Balance: ${nftBalance}`);
+                        break;
+                    } catch (error) {
+                        console.error(`Attempt ${attempt}: Error fetching balanceOf:`, error);
+                        if (attempt === maxAttempts) throw new Error(`Failed to fetch balanceOf: ${error.message}`);
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
                 const gtBalanceFormatted = Number(web3.utils.fromWei(gtBalance, 'ether')).toFixed(4);
                 const gdogBalanceFormatted = Number(web3.utils.fromWei(gdogBalance, 'ether')).toFixed(4);
                 document.getElementById('balanceStatus').innerText = `GT Balance: ${gtBalanceFormatted} | GDOG Balance: ${gdogBalanceFormatted} | NFTs Owned: ${nftBalance}`;
@@ -248,7 +268,8 @@
                 document.getElementById('mintButton').disabled = true;
                 document.getElementById('redeemButton').disabled = true;
                 document.getElementById('batchRedeemButton').disabled = true;
-                document.getElementById('balanceStatus').innerText = 'Query failed';
+                document.getElementById('checkTokenButton').disabled = true;
+                document.getElementById('balanceStatus').innerText = `Query failed: ${error.message}`;
                 document.getElementById('nftList').innerHTML = `<li>Query failed: ${error.message}</li>`;
                 document.getElementById('nameStatus').innerText = '';
             }
@@ -268,7 +289,7 @@
                     status.innerText = 'Insufficient GT for gas fees';
                     return false;
                 }
-                const tx = await gdogContract.methods.approve(NFT_ADDRESS, MAX_APPROVAL).send({
+                const tx = await gdogContract.methods.approve(NFT_ADDRESS, MAX_APPROAL).send({
                     from: account,
                     gas: web3.utils.toHex(Math.min(estimatedGas * 2, 1000000))
                 });
@@ -336,7 +357,6 @@
                 status.innerText = `NFT "${mintName}.gdog" minted successfully!`;
                 document.getElementById('mintName').value = '';
                 document.getElementById('nameStatus').innerText = '';
-                await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for blockchain sync
                 await checkBalances();
             } catch (error) {
                 status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Mint failed: ${error.message}`;
@@ -394,7 +414,6 @@
 
                 status.innerText = 'NFT redeemed successfully!';
                 document.getElementById('tokenId').value = '';
-                await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for blockchain sync
                 await checkBalances();
             } catch (error) {
                 status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Redeem failed: ${error.message}`;
@@ -457,13 +476,72 @@
 
                 status.innerText = 'Batch redeem successful!';
                 document.getElementById('tokenId').value = '';
-                await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for blockchain sync
                 await checkBalances();
             } catch (error) {
                 status.innerText = error.code === 4001 ? 'User cancelled transaction' : `Batch redeem failed: ${error.message}`;
             } finally {
                 batchRedeemButton.disabled = false;
                 batchRedeemButton.innerHTML = 'Batch Redeem Selected NFTs';
+            }
+        }
+
+        async function checkToken() {
+            const status = document.getElementById('networkStatus');
+            const checkTokenButton = document.getElementById('checkTokenButton');
+            const tokenId = document.getElementById('checkTokenId').value.trim();
+
+            if (!web3 || !account) {
+                status.innerText = 'Please connect wallet';
+                return;
+            }
+            if (!tokenId || isNaN(tokenId)) {
+                status.innerText = 'Enter valid Token ID';
+                return;
+            }
+
+            try {
+                checkTokenButton.disabled = true;
+                checkTokenButton.innerHTML = 'Checking... <i class="fa fa-spinner fa-spin ml-2"></i>';
+                status.innerText = `Checking Token ID ${tokenId}...`;
+
+                const isValid = await nftContract.methods.isTokenValid(tokenId).call();
+                if (!isValid) {
+                    status.innerText = `Token ID ${tokenId} is invalid or has been redeemed`;
+                    return;
+                }
+
+                const owner = await nftContract.methods.ownerOf(tokenId).call();
+                if (owner.toLowerCase() !== account.toLowerCase()) {
+                    status.innerText = `Token ID ${tokenId} is not owned by you`;
+                    return;
+                }
+
+                let tokenName;
+                try {
+                    tokenName = decodeURIComponent(escape(await nftContract.methods.tokenName(tokenId).call()));
+                } catch (error) {
+                    tokenName = `Token ID ${tokenId} (Name Unavailable)`;
+                    console.error(`Error decoding tokenName for token ${tokenId}:`, error);
+                }
+
+                const imageUrl = await getNFTImage(tokenId);
+                const nftList = document.getElementById('nftList');
+                const li = document.createElement('li');
+                li.className = 'flex items-center py-2';
+                li.innerHTML = `
+                    <input type="checkbox" class="nft-checkbox mr-2" value="${tokenId}">
+                    <img src="${imageUrl}" alt="NFT ${tokenName}" class="w-10 h-10 rounded mr-2 cursor-pointer" onerror="this.src='https://www.gdoggate.com/nft/default.jpg'" onclick="window.open('${imageUrl}', '_blank')">
+                    <span>${tokenName} (ID: ${tokenId})</span>
+                `;
+                nftList.appendChild(li);
+                status.innerText = `Token ID ${tokenId} added to list`;
+                document.getElementById('checkTokenId').value = '';
+                document.getElementById('batchRedeemButton').disabled = false;
+            } catch (error) {
+                status.innerText = `Check failed: ${error.message}`;
+            } finally {
+                checkTokenButton.disabled = false;
+                checkTokenButton.innerHTML = 'Check NFT';
             }
         }
 
@@ -557,9 +635,9 @@
 
         async function updateNFTList(nftBalance) {
             const nftList = document.getElementById('nftList');
-            nftList.innerHTML = '';
+            nftList.innerHTML = '<li>Loading NFTs... <i class="fa fa-spinner fa-spin ml-2"></i></li>';
             if (!web3 || !account || nftBalance == 0) {
-                nftList.innerHTML = '<li>No NFTs</li>';
+                nftList.innerHTML = '<li>No NFTs found. Try checking specific Token IDs.</li>';
                 document.getElementById('batchRedeemButton').disabled = true;
                 console.log('No NFTs or wallet not connected');
                 return;
@@ -569,13 +647,24 @@
                 console.log(`Fetching ${nftBalance} NFTs for account ${account}`);
                 for (let i = 0; i < nftBalance; i++) {
                     let tokenId;
-                    try {
-                        tokenId = await nftContract.methods.tokenOfOwnerByIndex(account, i).call();
-                        console.log(`Token ${i}: ID ${tokenId}`);
-                    } catch (error) {
-                        console.error(`Error fetching tokenOfOwnerByIndex for index ${i}:`, error);
-                        continue;
+                    let attempt = 0;
+                    const maxAttempts = 3;
+                    while (attempt < maxAttempts) {
+                        try {
+                            tokenId = await nftContract.methods.tokenOfOwnerByIndex(account, i).call();
+                            console.log(`Token ${i}: ID ${tokenId}`);
+                            break;
+                        } catch (error) {
+                            console.error(`Attempt ${attempt + 1}: Error fetching tokenOfOwnerByIndex for index ${i}:`, error);
+                            attempt++;
+                            if (attempt === maxAttempts) {
+                                console.error(`Failed to fetch tokenOfOwnerByIndex for index ${i}`);
+                                continue;
+                            }
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                        }
                     }
+                    if (!tokenId) continue;
                     let isValid;
                     try {
                         isValid = await nftContract.methods.isTokenValid(tokenId).call();
@@ -608,11 +697,16 @@
                     nftList.appendChild(li);
                     validNFTCount++;
                 }
-                document.getElementById('batchRedeemButton').disabled = validNFTCount === 0;
+                document.getElementById('batchRedeemButton').disabled = validNFTCount == 0;
                 console.log(`Total valid NFTs displayed: ${validNFTCount}`);
+                if (validNFTCount == 0 && nftBalance > 0) {
+                    nftList.innerHTML = '<li>No valid NFTs found. Try checking specific Token IDs.</li>';
+                } else if (validNFTCount == 0) {
+                    nftList.innerHTML = '<li>No NFTs found. Try checking specific Token IDs.</li>';
+                }
             } catch (error) {
                 console.error('Error updating NFT list:', error);
-                nftList.innerHTML = `<li>Query NFTs failed: ${error.message}</li>`;
+                nftList.innerHTML = `<li>Query NFTs failed: ${error.message}. Try checking specific Token IDs.</li>`;
                 document.getElementById('batchRedeemButton').disabled = true;
             }
         }
@@ -622,16 +716,19 @@
                 document.getElementById('mintButton').disabled = true;
                 document.getElementById('redeemButton').disabled = true;
                 document.getElementById('batchRedeemButton').disabled = true;
+                document.getElementById('checkTokenButton').disabled = true;
                 document.getElementById('nameStatus').innerText = '';
                 return;
             }
             const mintName = document.getElementById('mintName').value.trim();
             const tokenId = document.getElementById('tokenId').value.trim();
+            const checkTokenId = document.getElementById('checkTokenId').value.trim();
             clearTimeout(debounceTimeout);
             debounceTimeout = setTimeout(async () => {
                 const isNameAvailable = await checkNameAvailability(mintName);
                 document.getElementById('mintButton').disabled = !mintName || new TextEncoder().encode(mintName).length > 15 || !isNameAvailable;
                 document.getElementById('redeemButton').disabled = !tokenId || isNaN(tokenId);
+                document.getElementById('checkTokenButton').disabled = !checkTokenId || isNaN(checkTokenId);
             }, 300);
         }
 
@@ -640,8 +737,11 @@
             document.getElementById('mintButton').addEventListener('click', mintNFT);
             document.getElementById('redeemButton').addEventListener('click', redeemNFT);
             document.getElementById('batchRedeemButton').addEventListener('click', batchRedeemNFT);
+            document.getElementById('checkTokenButton').addEventListener('click', checkToken);
+            document.getElementById('refreshButton').addEventListener('click', checkBalances);
             document.getElementById('mintName').addEventListener('input', checkButtonStatus);
             document.getElementById('tokenId').addEventListener('input', checkButtonStatus);
+            document.getElementById('checkTokenId').addEventListener('input', checkButtonStatus);
 
             const menuToggle = document.getElementById('menuToggle');
             const mobileMenu = document.getElementById('mobileMenu');
